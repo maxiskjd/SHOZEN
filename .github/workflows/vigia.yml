@@ -1,0 +1,42 @@
+name: Vigia Jordan/Bold
+
+on:
+  schedule:
+    # cada 15 min, entre 11:00 y 04:00 UTC (cubre 8:00-23:00 hora de Chile
+    # con margen para el cambio de horario de verano; el script mismo
+    # vuelve a chequear la hora exacta y no hace nada fuera de rango)
+    - cron: "*/15 11-23,0-4 * * *"
+  workflow_dispatch: {}  # permite correrlo a mano desde la pestaña Actions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vigia-jordan-bold
+  cancel-in-progress: false
+
+jobs:
+  vigia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Correr vigia
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python vigia_jordan_bold.py
+
+      - name: Guardar estado actualizado
+        run: |
+          git config user.name "vigia-bot"
+          git config user.email "actions@github.com"
+          git add vigia_jordan_estado.json vigia_jordan_log.txt
+          git diff --staged --quiet || git commit -m "Actualiza estado del vigia [skip ci]"
+          git push
