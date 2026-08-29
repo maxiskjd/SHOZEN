@@ -1,6 +1,6 @@
 """
-Vigia de restocks / lanzamientos nuevos para modelos Jordan en Bold, Moredrops
-y The Line.
+Vigia de restocks / lanzamientos nuevos para modelos configurados (Jordan
+Retro 4, Puma 180) en Bold, Moredrops y The Line.
 
 Pensado para correr seguido (cada 1-2 min) via GitHub Actions (o el
 Programador de tareas de Windows si se corre local): cada corrida es
@@ -27,28 +27,49 @@ import requests
 
 # ============================== CONFIGURACION ==============================
 
-# Terminos de busqueda a vigilar. Agrega mas lineas para otros modelos.
-TERMINOS_BUSQUEDA = [
-    "air jordan 4 retro",
-]
-
 # Los buscadores de cada tienda hacen matching bastante suelto (ej. "air
 # jordan 4 retro" tambien trae Jordan 1, Jordan 3, Air Force, etc). Este
 # filtro se aplica sobre el nombre real del producto y solo deja pasar los
 # que de verdad son Retro 4 (tienen un "4" como numero de modelo Y la
 # palabra "retro" en el nombre - asi excluye la linea "4 RM", que es un
 # modelo distinto aunque comparta el numero).
-FILTRO_MODELO = re.compile(r"\b4\b", re.I)
+FILTRO_MODELO_JORDAN = re.compile(r"\b4\b", re.I)
 FILTRO_RETRO = re.compile(r"\bretro\b", re.I)
 
 
 def es_retro_4(nombre):
     nombre = nombre or ""
-    return bool(FILTRO_MODELO.search(nombre) and FILTRO_RETRO.search(nombre))
+    return bool(FILTRO_MODELO_JORDAN.search(nombre) and FILTRO_RETRO.search(nombre))
 
 
-# Solo interesan estas tallas (formato numerico plano, ej. "8.5", "9")
-TALLAS_OBJETIVO = {"8.5", "9"}
+# Mismo criterio para Puma 180: el nombre debe traer "puma" Y "180".
+FILTRO_PUMA = re.compile(r"\bpuma\b", re.I)
+FILTRO_180 = re.compile(r"\b180\b", re.I)
+
+
+def es_puma_180(nombre):
+    nombre = nombre or ""
+    return bool(FILTRO_PUMA.search(nombre) and FILTRO_180.search(nombre))
+
+
+# Cada entrada es un modelo a vigilar: termino de busqueda, filtro sobre el
+# nombre real del producto (para descartar falsos positivos del buscador de
+# la tienda) y las tallas que importan para el aviso de RESTOCK (formato
+# numerico plano, ej. "8.5", "9", "10"). Agrega mas entradas para otros
+# modelos.
+CONFIGURACION_BUSQUEDA = [
+    {
+        "termino": "air jordan 4 retro",
+        "filtro_modelo": es_retro_4,
+        "tallas_objetivo": {"8.5", "9"},
+    },
+    {
+        "termino": "puma 180",
+        "filtro_modelo": es_puma_180,
+        "tallas_objetivo": {"10"},
+    },
+]
+
 FILTRO_TALLA_OCC = re.compile(r"US\s+([\d.]+)\s+MEN", re.I)
 
 CARPETA = Path(__file__).resolve().parent
@@ -84,10 +105,10 @@ def limpiar_nombre(nombre):
     return html.unescape(re.sub(r"<[^>]+>", "", nombre)).strip()
 
 
-def buscar_occ(termino, site_id, base_url):
+def buscar_occ(termino, site_id, base_url, filtro_modelo, tallas_objetivo):
     """Bold y Moredrops corren la misma plataforma (SAP Commerce / ynk.cl).
     Devuelve un item por CADA COLORWAY (no por talla), con la lista de
-    tallas 8.5/9 y su stock adentro - asi se puede avisar de un colorway
+    tallas objetivo y su stock adentro - asi se puede avisar de un colorway
     nuevo sin importar si esas tallas puntuales tienen stock o no."""
     q = requests.utils.quote(termino)
     url = (
@@ -101,7 +122,7 @@ def buscar_occ(termino, site_id, base_url):
     for p in productos:
         nombre = limpiar_nombre(p.get("name"))
         code = p.get("code")
-        if not code or not es_retro_4(nombre):
+        if not code or not filtro_modelo(nombre):
             continue
 
         link = p.get("url") or ""
@@ -123,7 +144,7 @@ def buscar_occ(termino, site_id, base_url):
             qualifiers = v.get("variantOptionQualifiers") or []
             talla_valor = qualifiers[0].get("value") if qualifiers else ""
             m = FILTRO_TALLA_OCC.match(talla_valor or "")
-            if not (m and m.group(1) in TALLAS_OBJETIVO):
+            if not (m and m.group(1) in tallas_objetivo):
                 continue
             tallas.append({
                 "talla": m.group(1),
@@ -142,7 +163,7 @@ def buscar_occ(termino, site_id, base_url):
     return resultado
 
 
-def buscar_theline(termino):
+def buscar_theline(termino, filtro_modelo, tallas_objetivo):
     """VTEX ya trae cada talla como un 'item' separado con su propio stock,
     asi que se filtra directo sin llamadas extra. Se agrupa por producto
     (no por talla) por el mismo motivo que en buscar_occ."""
@@ -156,7 +177,7 @@ def buscar_theline(termino):
     resultado = []
     for p in productos:
         nombre_producto = limpiar_nombre(p.get("productName"))
-        if not es_retro_4(nombre_producto):
+        if not filtro_modelo(nombre_producto):
             continue
 
         tallas = []
@@ -170,7 +191,7 @@ def buscar_theline(termino):
             precio_fmt = f"${precio:,.0f}".replace(",", ".") if precio else None
             if precio_base is None:
                 precio_base = precio_fmt
-            if talla not in TALLAS_OBJETIVO:
+            if talla not in tallas_objetivo:
                 continue
             tallas.append({
                 "talla": talla,
@@ -189,9 +210,9 @@ def buscar_theline(termino):
 
 
 TIENDAS = [
-    ("Bold", lambda t: buscar_occ(t, "boldb2cstore", "https://www.bold.cl")),
-    ("Moredrops", lambda t: buscar_occ(t, "dropsb2cstore", "https://www.moredrops.cl")),
-    ("The Line", buscar_theline),
+    ("Bold", lambda t, f, ta: buscar_occ(t, "boldb2cstore", "https://www.bold.cl", f, ta)),
+    ("Moredrops", lambda t, f, ta: buscar_occ(t, "dropsb2cstore", "https://www.moredrops.cl", f, ta)),
+    ("The Line", lambda t, f, ta: buscar_theline(t, f, ta)),
 ]
 
 
@@ -257,13 +278,18 @@ def main():
     terminos_conocidos = set(estado["terminos_conocidos"])
     terminos_nuevos_bautizados = []
     nuevos = []      # colorways nunca vistos - avisa sin importar la talla
-    restocks = []    # talla 8.5/9 que paso de agotada a disponible, en colorways YA conocidos
+    restocks = []    # talla objetivo que paso de agotada a disponible, en colorways YA conocidos
 
-    for termino in TERMINOS_BUSQUEDA:
+    for config in CONFIGURACION_BUSQUEDA:
+        termino = config["termino"]
+        filtro_modelo = config["filtro_modelo"]
+        tallas_objetivo = config["tallas_objetivo"]
+        tallas_objetivo_txt = ", ".join(sorted(tallas_objetivo))
         es_termino_nuevo = termino not in terminos_conocidos
+
         for nombre_tienda, buscador in TIENDAS:
             try:
-                productos = buscador(termino)
+                productos = buscador(termino, filtro_modelo, tallas_objetivo)
             except Exception as e:
                 print(f"[{nombre_tienda}] error buscando '{termino}': {e}")
                 continue
@@ -281,6 +307,7 @@ def main():
                         "link": p["link"],
                         "precio": p["precio_base"],
                         "tallas_disponibles": tallas_disponibles,
+                        "tallas_objetivo_txt": tallas_objetivo_txt,
                     }))
                 estilos_conocidos.add(clave_estilo)
 
@@ -311,16 +338,17 @@ def main():
         print(f"Migracion: se bautizaron {len(estilos_conocidos)} colorways ya conocidos en silencio "
               "(no se avisa 'NUEVO' de ninguno esta vez).")
 
+    terminos_totales = {c["termino"] for c in CONFIGURACION_BUSQUEDA}
     if terminos_nuevos_bautizados:
-        print("Termino(s) nuevo(s) agregados a TERMINOS_BUSQUEDA, se guardo su estado "
+        print("Termino(s) nuevo(s) agregados a CONFIGURACION_BUSQUEDA, se guardo su estado "
               f"inicial sin avisar nada (recien empieza el seguimiento): {terminos_nuevos_bautizados}")
-        if not (TERMINOS_BUSQUEDA and set(TERMINOS_BUSQUEDA) - set(terminos_nuevos_bautizados)):
+        if not (terminos_totales - set(terminos_nuevos_bautizados)):
             return
 
     lineas_log = []
     for tienda, p in nuevos:
-        tallas_txt = ", ".join(p["tallas_disponibles"]) if p["tallas_disponibles"] else "sin stock en 8.5/9 por ahora"
-        lineas_log.append(f"NUEVO  [{tienda}] {p['nombre']} | {p['precio']} | tallas 8.5/9: {tallas_txt} | {p['link']}")
+        tallas_txt = ", ".join(p["tallas_disponibles"]) if p["tallas_disponibles"] else f"sin stock en {p['tallas_objetivo_txt']} por ahora"
+        lineas_log.append(f"NUEVO  [{tienda}] {p['nombre']} | {p['precio']} | tallas {p['tallas_objetivo_txt']}: {tallas_txt} | {p['link']}")
     for tienda, p in restocks:
         lineas_log.append(f"RESTOCK [{tienda}] {p['nombre']} | {p['precio']} | {p['link']}")
 
@@ -333,8 +361,8 @@ def main():
         for tienda, p in restocks:
             cuerpos.append(f"RESTOCK · {tienda}\n{p['nombre']}\n{p['precio']}\n{p['link']}")
         for tienda, p in nuevos:
-            tallas_txt = ", ".join(p["tallas_disponibles"]) if p["tallas_disponibles"] else "sin stock en 8.5/9 por ahora (revisa otras tallas)"
-            cuerpos.append(f"NUEVO COLORWAY · {tienda}\n{p['nombre']}\nTallas 8.5/9: {tallas_txt}\n{p['precio']}\n{p['link']}")
+            tallas_txt = ", ".join(p["tallas_disponibles"]) if p["tallas_disponibles"] else f"sin stock en {p['tallas_objetivo_txt']} por ahora (revisa otras tallas)"
+            cuerpos.append(f"NUEVO COLORWAY · {tienda}\n{p['nombre']}\nTallas {p['tallas_objetivo_txt']}: {tallas_txt}\n{p['precio']}\n{p['link']}")
 
         total_eventos = len(restocks) + len(nuevos)
         cuerpo = "\n\n".join(cuerpos[:10])
