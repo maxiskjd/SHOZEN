@@ -1217,8 +1217,8 @@
       "precio": "$69.990"
     },
     "The Line|12218|10": {
-      "en_stock": true,
-      "precio": "$69.990"
+      "en_stock": false,
+      "precio": "$94.990"
     }
   },
   "estilos_conocidos": [
