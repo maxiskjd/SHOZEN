@@ -1227,6 +1227,10 @@
     "The Line|178|10": {
       "en_stock": false,
       "precio": "$89.990"
+    },
+    "The Line|13017|10": {
+      "en_stock": false,
+      "precio": "$94.990"
     }
   },
   "estilos_conocidos": [
@@ -1252,6 +1256,7 @@
     "The Line|12218",
     "The Line|12220",
     "The Line|12678",
+    "The Line|13017",
     "The Line|13674",
     "The Line|178"
   ]
