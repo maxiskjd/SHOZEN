@@ -1231,9 +1231,27 @@
     "The Line|13017|10": {
       "en_stock": false,
       "precio": "$94.990"
+    },
+    "Bold|NIIO2463102|8.5": {
+      "en_stock": false,
+      "precio": "$226.990"
+    },
+    "Bold|NIIO2463102|9": {
+      "en_stock": false,
+      "precio": "$226.990"
+    },
+    "The Line|14847|8.5": {
+      "en_stock": true,
+      "precio": "$226.990"
+    },
+    "The Line|14847|9": {
+      "en_stock": true,
+      "precio": "$226.990"
     }
   },
   "estilos_conocidos": [
+    "Bold|NIBQ7669102",
+    "Bold|NIBQ7670102",
     "Bold|NIFQ8138600",
     "Bold|NIFQ8213600",
     "Bold|NIHV4381600",
@@ -1243,6 +1261,7 @@
     "Bold|NIIM4026100",
     "Bold|NIIM4027100",
     "Bold|NIIM4028100",
+    "Bold|NIIO2463102",
     "Bold|PM38926710",
     "Bold|PM38926717",
     "Bold|PM40163802",
@@ -1258,6 +1277,8 @@
     "The Line|12678",
     "The Line|13017",
     "The Line|13674",
+    "The Line|14706",
+    "The Line|14847",
     "The Line|178"
   ]
 }

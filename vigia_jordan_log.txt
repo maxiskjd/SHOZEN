@@ -17,3 +17,8 @@
 [2026-09-02 21:18:08] NUEVO  [Bold] 180 PRO Zapatillas Puma Hombre Blanco | $94.990 | tallas 10: 10 | https://www.bold.cl/Categories/Genero/Hombre/Calzado-Hombre/Zapatillas-Hombre/180-PRO-Zapatillas-Puma-Hombre-Blanco/p/PM40447207
 [2026-09-08 00:54:32] NUEVO  [The Line] ZAPATILLA PUMA PUMA-180 POP HOMBRE | $89.990 | tallas 10: sin stock en 10 por ahora | https://www.theline.cl/393286-01-puma-180-pop/p
 [2026-09-21 23:49:43] NUEVO  [The Line] ZAPATILLA PUMA PUMA-180 PRO UNISEX | $94.990 | tallas 10: sin stock en 10 por ahora | https://www.theline.cl/404472-02-11-5/p
+[2026-09-22 15:25:33] NUEVO  [Bold] Air Jordan 4 Retro Zapatillas Jordan Bebé Blanco | $64.990 | tallas 8.5, 9: sin stock en 8.5, 9 por ahora | https://www.bold.cl/Categories/Ni%C3%B1o/Beb%C3%A9/Zapatillas-Beb%C3%A9/Air-Jordan-4-Retro-Zapatillas-Jordan-Beb%C3%A9-Blanco/p/NIBQ7670102
+[2026-09-22 15:25:33] NUEVO  [Bold] Air Jordan 4 Retro Zapatillas Jordan Niño Blanco | $99.990 | tallas 8.5, 9: sin stock en 8.5, 9 por ahora | https://www.bold.cl/Categories/Ni%C3%B1o/Ni%C3%B1o/Zapatillas-Ni%C3%B1o/Air-Jordan-4-Retro-Zapatillas-Jordan-Ni%C3%B1o-Blanco/p/NIBQ7669102
+[2026-09-22 15:25:33] NUEVO  [Bold] Air 4 Retro Rare Air Zapatillas Jordan Hombre Blanco | $226.990 | tallas 8.5, 9: sin stock en 8.5, 9 por ahora | https://www.bold.cl/Campa%C3%B1as/Lanzamientos/Air-4-Retro-Rare-Air-Zapatillas-Jordan-Hombre-Blanco/p/NIIO2463102
+[2026-09-22 15:25:33] NUEVO  [The Line] Zapatilla Air Jordan 4 Retro Hombre | $226.990 | tallas 8.5, 9: 8.5, 9 | https://www.theline.cl/io2463-102-10/p
+[2026-09-22 15:25:33] NUEVO  [The Line] Zapatilla Jordan 4 Retro Niño Pre Escolar | $99.990 | tallas 8.5, 9: sin stock en 8.5, 9 por ahora | https://www.theline.cl/bq7669-102-11c/p
