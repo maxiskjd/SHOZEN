@@ -1217,7 +1217,7 @@
       "precio": "$94.990"
     },
     "The Line|12218|10": {
-      "en_stock": false,
+      "en_stock": true,
       "precio": "$94.990"
     },
     "Bold|PM40447207|10": {
@@ -1229,7 +1229,7 @@
       "precio": "$89.990"
     },
     "The Line|13017|10": {
-      "en_stock": false,
+      "en_stock": true,
       "precio": "$94.990"
     },
     "Bold|NIIO2463102|8.5": {
@@ -1278,6 +1278,7 @@
     "The Line|13017",
     "The Line|13674",
     "The Line|14706",
+    "The Line|14707",
     "The Line|14847",
     "The Line|178"
   ]
