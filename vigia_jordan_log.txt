@@ -25,3 +25,5 @@
 [2026-09-28 23:26:58] NUEVO  [The Line] Zapatilla Jordan 4 Retro Bebé e Infantil | $64.990 | tallas 8.5, 9: sin stock en 8.5, 9 por ahora | https://www.theline.cl/bq7670-102-10c/p
 [2026-09-28 23:26:58] RESTOCK [The Line] ZAPATILLA PUMA PUMA-180 PRO HOMBRE (talla 10) | $94.990 | https://www.theline.cl/404472-03-11-5/p
 [2026-09-28 23:26:58] RESTOCK [The Line] ZAPATILLA PUMA PUMA-180 PRO UNISEX (talla 10) | $94.990 | https://www.theline.cl/404472-02-11-5/p
+[2026-10-06 00:55:48] RESTOCK [The Line] Zapatilla Air Jordan 4 Retro Hombre (talla 8.5) | $226.990 | https://www.theline.cl/io2463-102-10/p
+[2026-10-06 00:55:48] RESTOCK [The Line] Zapatilla Air Jordan 4 Retro Hombre (talla 9) | $226.990 | https://www.theline.cl/io2463-102-10/p
