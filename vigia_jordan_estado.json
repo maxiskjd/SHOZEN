@@ -1229,8 +1229,8 @@
       "precio": "$89.990"
     },
     "The Line|13017|10": {
-      "en_stock": false,
-      "precio": "$94.990"
+      "en_stock": true,
+      "precio": "$64.990"
     },
     "Bold|NIIO2463102|8.5": {
       "en_stock": false,
