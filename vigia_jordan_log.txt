@@ -28,3 +28,4 @@
 [2026-10-06 00:55:48] RESTOCK [The Line] Zapatilla Air Jordan 4 Retro Hombre (talla 8.5) | $226.990 | https://www.theline.cl/io2463-102-10/p
 [2026-10-06 00:55:48] RESTOCK [The Line] Zapatilla Air Jordan 4 Retro Hombre (talla 9) | $226.990 | https://www.theline.cl/io2463-102-10/p
 [2026-10-06 17:02:44] RESTOCK [The Line] ZAPATILLA PUMA PUMA-180 PRO UNISEX (talla 10) | $64.990 | https://www.theline.cl/404472-02-11-5/p
+[2026-10-13 22:23:41] NUEVO  [Bold] Air 4 Retro Zapatillas Jordan Junior Blanco/Amarillo | $164.990 | tallas 8.5, 9: sin stock en 8.5, 9 por ahora | https://www.bold.cl/Categories/Ni%C3%B1o/Joven/Zapatillas-Joven/Air-4-Retro-Zapatillas-Jordan-Junior-Blanco-Amarillo/p/NI408452102
