@@ -1,24 +1,29 @@
 """
-Vigia de restocks / lanzamientos nuevos para modelos configurados (Jordan
-Retro 4, Puma 180) en Bold, Moredrops y The Line.
+Vigia de stock y ofertas para modelos configurados (Jordan 4 Retro, Puma
+180 / 180 Pro, Air Force 1 blancas) en Bold, Moredrops y The Line.
 
-Pensado para correr seguido (cada 1-2 min) via GitHub Actions (o el
-Programador de tareas de Windows si se corre local): cada corrida es
-independiente, compara contra el estado guardado en ARCHIVO_ESTADO y solo
-avisa por Telegram cuando hay algo NUEVO (producto que no se habia visto
-antes) o un RESTOCK (un producto que antes estaba agotado y ahora tiene
-stock). Fuera del horario 8:00-23:00 (hora de Chile) no revisa nada, para
-no generar trafico de madrugada.
+Corre via GitHub Actions: cada corrida es independiente, compara contra el
+estado guardado en ARCHIVO_ESTADO y avisa por Telegram solo cuando, en una
+de las tallas objetivo (US hombre):
+  - DISPONIBLE: la talla paso de agotada (o nunca vista) a tener stock.
+  - OFERTA: la talla tiene stock y entro en descuento, o el precio de oferta
+    bajo todavia mas desde el ultimo aviso.
+Fuera del horario 8:00-23:00 (hora de Chile) no revisa nada.
 
 Uso manual: python vigia_jordan_bold.py
-Requiere las variables de entorno TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID
-para poder avisar (si no estan, igual revisa y deja el log, pero no notifica).
+Requiere TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID para avisar (si no estan,
+igual revisa y deja el log, pero no notifica).
+
+Si Telegram rechaza el aviso, el script termina con error: asi la corrida
+queda en rojo en GitHub (te llega correo) y el estado no se guarda, de modo
+que la proxima corrida vuelve a intentar el mismo aviso.
 """
 
 import html
 import json
 import os
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -27,50 +32,64 @@ import requests
 
 # ============================== CONFIGURACION ==============================
 
-# Los buscadores de cada tienda hacen matching bastante suelto (ej. "air
-# jordan 4 retro" tambien trae Jordan 1, Jordan 3, Air Force, etc). Este
-# filtro se aplica sobre el nombre real del producto y solo deja pasar los
-# que de verdad son Retro 4 (tienen un "4" como numero de modelo Y la
-# palabra "retro" en el nombre - asi excluye la linea "4 RM", que es un
-# modelo distinto aunque comparta el numero).
-FILTRO_MODELO_JORDAN = re.compile(r"\b4\b", re.I)
-FILTRO_RETRO = re.compile(r"\bretro\b", re.I)
+# Productos de mujer o de niños: sus tallas no son US hombre aunque el numero
+# coincida, asi que se descartan siempre.
+FILTRO_NO_HOMBRE = re.compile(
+    r"\b(mujer|wmns|junior|joven|ni[ñn]o|ni[ñn]a|ni[ñn]os|beb[ée]|infantil|"
+    r"pre\s?escolar|preescolar|gs|bg|ps|td)\b",
+    re.I,
+)
 
 
-def es_retro_4(nombre):
-    nombre = nombre or ""
-    return bool(FILTRO_MODELO_JORDAN.search(nombre) and FILTRO_RETRO.search(nombre))
+def _tiene(patron, nombre):
+    return bool(re.search(patron, nombre or "", re.I))
 
 
-# Mismo criterio para Puma 180: el nombre debe traer "puma" Y "180".
-FILTRO_PUMA = re.compile(r"\bpuma\b", re.I)
-FILTRO_180 = re.compile(r"\b180\b", re.I)
+def es_jordan_4_retro(nombre, color):
+    # "4" como numero de modelo y "retro" (excluye la linea "4 RM").
+    return _tiene(r"\b4\b", nombre) and _tiene(r"\bretro\b", nombre)
 
 
-def es_puma_180(nombre):
-    nombre = nombre or ""
-    return bool(FILTRO_PUMA.search(nombre) and FILTRO_180.search(nombre))
+def es_puma_180(nombre, color):
+    # Cubre "Puma 180", "180 Pro", "PUMA-180 POP", etc.
+    return _tiene(r"\bpuma\b", nombre) and _tiene(r"\b180\b", nombre)
 
 
-# Cada entrada es un modelo a vigilar: termino de busqueda, filtro sobre el
-# nombre real del producto (para descartar falsos positivos del buscador de
-# la tienda) y las tallas que importan para el aviso de RESTOCK (formato
-# numerico plano, ej. "8.5", "9", "10"). Agrega mas entradas para otros
-# modelos.
+def es_air_force_1_blanca(nombre, color):
+    if not (_tiene(r"\bair force 1\b", nombre) and _tiene(r"zapatilla", nombre)):
+        return False
+    if color:  # The Line trae el color como dato aparte
+        return color.upper().startswith("BLANC")
+    # Bold/Moredrops ponen el color al final del nombre, despues del genero
+    # ("... Hombre Blanco/Negro"): el color principal debe ser blanco.
+    return _tiene(r"\b(hombre|unisex)\s+blanc", nombre)
+
+
+# Cada entrada: termino de busqueda en las tiendas, filtro sobre el nombre
+# real (el buscador de las tiendas trae mucho ruido) y tallas US hombre.
 CONFIGURACION_BUSQUEDA = [
     {
+        "modelo": "Jordan 4 Retro",
         "termino": "air jordan 4 retro",
-        "filtro_modelo": es_retro_4,
+        "filtro_modelo": es_jordan_4_retro,
         "tallas_objetivo": {"8.5", "9"},
     },
     {
+        "modelo": "Puma 180 / 180 Pro",
         "termino": "puma 180",
         "filtro_modelo": es_puma_180,
         "tallas_objetivo": {"10"},
     },
+    {
+        "modelo": "Air Force 1 blancas",
+        "termino": "air force 1",
+        "filtro_modelo": es_air_force_1_blanca,
+        "tallas_objetivo": {"8.5", "9"},
+    },
 ]
 
-FILTRO_TALLA_OCC = re.compile(r"US\s+([\d.]+)\s+MEN", re.I)
+FILTRO_TALLA_OCC = re.compile(r"US\s+([\d.]+)\s+MEN\b", re.I)
+MAX_PAGINAS = 8  # tope de paginas de 50 resultados por busqueda
 
 CARPETA = Path(__file__).resolve().parent
 ARCHIVO_ESTADO = CARPETA / "vigia_jordan_estado.json"
@@ -90,13 +109,13 @@ HORA_FIN = 23
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
+TELEGRAM_MAX = 3800  # el limite real es 4096; se deja margen
 
 # =============================================================================
 
 
 def dentro_de_horario():
-    ahora = datetime.now(ZONA_CL)
-    return HORA_INICIO <= ahora.hour < HORA_FIN
+    return HORA_INICIO <= datetime.now(ZONA_CL).hour < HORA_FIN
 
 
 def limpiar_nombre(nombre):
@@ -105,24 +124,50 @@ def limpiar_nombre(nombre):
     return html.unescape(re.sub(r"<[^>]+>", "", nombre)).strip()
 
 
+def a_entero(valor):
+    try:
+        return int(round(float(valor))) if valor is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def fmt_clp(valor):
+    return f"${valor:,.0f}".replace(",", ".") if valor else "?"
+
+
+def es_de_hombre(nombre, genero=""):
+    if genero and re.search(r"mujer|ni[ñn]|infantil|beb", genero, re.I):
+        return False
+    return not FILTRO_NO_HOMBRE.search(nombre or "")
+
+
 def buscar_occ(termino, site_id, base_url, filtro_modelo, tallas_objetivo):
-    """Bold y Moredrops corren la misma plataforma (SAP Commerce / ynk.cl).
-    Devuelve un item por CADA COLORWAY (no por talla), con la lista de
-    tallas objetivo y su stock adentro - asi se puede avisar de un colorway
-    nuevo sin importar si esas tallas puntuales tienen stock o no."""
+    """Bold y Moredrops (SAP Commerce / ynk.cl). Devuelve un item por
+    colorway con sus tallas objetivo (stock + precio actual + precio normal)."""
     q = requests.utils.quote(termino)
-    url = (
-        f"https://api-prd.ynk.cl/rest/v2/{site_id}/products/search"
-        f"?query={q}&pageSize=50&lang=es_CL&curr=CLP"
-    )
-    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
-    r.raise_for_status()
-    productos = r.json().get("products", [])
+    productos = []
+    for pagina in range(MAX_PAGINAS):
+        url = (
+            f"https://api-prd.ynk.cl/rest/v2/{site_id}/products/search"
+            f"?query={q}&pageSize=50&currentPage={pagina}&lang=es_CL&curr=CLP"
+        )
+        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+        r.raise_for_status()
+        datos = r.json()
+        productos.extend(datos.get("products", []))
+        total_paginas = (datos.get("pagination") or {}).get("totalPages") or 1
+        if pagina + 1 >= total_paginas:
+            break
+
     resultado = []
+    vistos = set()
     for p in productos:
         nombre = limpiar_nombre(p.get("name"))
         code = p.get("code")
-        if not code or not filtro_modelo(nombre):
+        if not code or code in vistos:
+            continue
+        vistos.add(code)
+        if not (filtro_modelo(nombre, "") and es_de_hombre(nombre)):
             continue
 
         link = p.get("url") or ""
@@ -136,76 +181,84 @@ def buscar_occ(termino, site_id, base_url, filtro_modelo, tallas_objetivo):
             )
             rd.raise_for_status()
             detalle = rd.json()
-        except Exception:
+        except Exception as e:
+            # Sin detalle no se sabe el stock: se salta este producto y su
+            # estado anterior queda tal cual.
+            print(f"  detalle de {code} fallo: {e}")
             continue
 
-        tallas = []
+        precio_prod = a_entero((p.get("price") or {}).get("value"))
+        normal_prod = a_entero((p.get("regularPrice") or {}).get("value")) or precio_prod
+
+        tallas = {}
         for v in detalle.get("variantOptions", []):
             qualifiers = v.get("variantOptionQualifiers") or []
             talla_valor = qualifiers[0].get("value") if qualifiers else ""
             m = FILTRO_TALLA_OCC.match(talla_valor or "")
             if not (m and m.group(1) in tallas_objetivo):
                 continue
-            tallas.append({
-                "talla": m.group(1),
-                "en_stock": (v.get("stock") or {}).get("stockLevelStatus") == "inStock",
-                "precio": (v.get("priceData") or {}).get("formattedValue")
-                or (p.get("price") or {}).get("formattedValue"),
-            })
+            precio = a_entero((v.get("priceData") or {}).get("value")) or precio_prod
+            normal = a_entero((v.get("regularPrice") or {}).get("value")) or normal_prod or precio
+            estado_stock = (v.get("stock") or {}).get("stockLevelStatus")
+            tallas[m.group(1)] = {
+                # "lowStock" (pocas unidades) tambien se puede comprar.
+                "en_stock": estado_stock in ("inStock", "lowStock"),
+                "precio": precio,
+                "precio_normal": max(normal or 0, precio or 0) or None,
+            }
 
-        resultado.append({
-            "codigo": code,
-            "nombre": nombre,
-            "link": link,
-            "precio_base": (p.get("price") or {}).get("formattedValue"),
-            "tallas": tallas,
-        })
+        resultado.append({"codigo": code, "nombre": nombre, "link": link, "tallas": tallas})
     return resultado
 
 
 def buscar_theline(termino, filtro_modelo, tallas_objetivo):
-    """VTEX ya trae cada talla como un 'item' separado con su propio stock,
-    asi que se filtra directo sin llamadas extra. Se agrupa por producto
-    (no por talla) por el mismo motivo que en buscar_occ."""
-    url = (
-        "https://www.theline.cl/api/catalog_system/pub/products/search"
-        f"?ft={requests.utils.quote(termino)}&_from=0&_to=49"
-    )
-    r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
-    r.raise_for_status()
-    productos = r.json()
+    """The Line (VTEX): cada talla viene como un 'item' con su propio stock."""
+    productos = []
+    for pagina in range(MAX_PAGINAS):
+        desde = pagina * 50
+        url = (
+            "https://www.theline.cl/api/catalog_system/pub/products/search"
+            f"?ft={requests.utils.quote(termino)}&_from={desde}&_to={desde + 49}"
+        )
+        r = requests.get(url, headers=HEADERS, timeout=TIMEOUT)
+        if r.status_code in (206, 200):
+            lote = r.json()
+        else:
+            r.raise_for_status()
+            lote = []
+        productos.extend(lote)
+        if len(lote) < 50:
+            break
+
     resultado = []
+    vistos = set()
     for p in productos:
-        nombre_producto = limpiar_nombre(p.get("productName"))
-        if not filtro_modelo(nombre_producto):
+        codigo = p.get("productId")
+        if not codigo or codigo in vistos:
+            continue
+        vistos.add(codigo)
+        nombre = limpiar_nombre(p.get("productName"))
+        color = (p.get("COLOR") or [""])[0]
+        genero = " ".join(p.get("GENERO") or []) + " " + " ".join(p.get("EDAD") or [])
+        if not (filtro_modelo(nombre, color) and es_de_hombre(nombre, genero)):
             continue
 
-        tallas = []
-        precio_base = None
+        tallas = {}
         for item in p.get("items") or []:
-            valores_talla = item.get("TALLA") or []
-            talla = valores_talla[0] if valores_talla else ""
-            sellers = item.get("sellers") or []
-            oferta = sellers[0].get("commertialOffer") if sellers else {}
-            precio = oferta.get("Price")
-            precio_fmt = f"${precio:,.0f}".replace(",", ".") if precio else None
-            if precio_base is None:
-                precio_base = precio_fmt
+            talla = (item.get("TALLA") or [""])[0]
             if talla not in tallas_objetivo:
                 continue
-            tallas.append({
-                "talla": talla,
+            sellers = item.get("sellers") or []
+            oferta = (sellers[0].get("commertialOffer") if sellers else None) or {}
+            precio = a_entero(oferta.get("Price"))
+            normal = a_entero(oferta.get("ListPrice")) or a_entero(oferta.get("PriceWithoutDiscount"))
+            tallas[talla] = {
                 "en_stock": (oferta.get("AvailableQuantity") or 0) > 0,
-                "precio": precio_fmt,
-            })
+                "precio": precio,
+                "precio_normal": max(normal or 0, precio or 0) or None,
+            }
 
-        resultado.append({
-            "codigo": p.get("productId"),
-            "nombre": nombre_producto,
-            "link": p.get("link"),
-            "precio_base": precio_base,
-            "tallas": tallas,
-        })
+        resultado.append({"codigo": codigo, "nombre": nombre, "link": p.get("link"), "tallas": tallas})
     return resultado
 
 
@@ -216,162 +269,203 @@ TIENDAS = [
 ]
 
 
+def en_oferta(info):
+    return bool(info.get("precio") and info.get("precio_normal") and info["precio"] < info["precio_normal"])
+
+
 def cargar_estado():
+    """Devuelve {clave 'tienda|codigo|talla': {en_stock, precio, precio_normal}}.
+    Acepta el formato viejo (precios como texto "$94.990", claves sin talla)."""
     try:
         with open(ARCHIVO_ESTADO, "r", encoding="utf-8") as f:
             datos = json.load(f)
     except FileNotFoundError:
-        return {"terminos_conocidos": [], "estilos_conocidos": [], "productos": {}}
+        return {}
+    productos = datos.get("productos", datos) if isinstance(datos, dict) else {}
+    estado = {}
+    for clave, info in productos.items():
+        if clave.count("|") != 2 or not isinstance(info, dict):
+            continue  # claves antiguas sin talla: ya no sirven
+        precio = info.get("precio")
+        if isinstance(precio, str):
+            precio = a_entero(re.sub(r"[^\d]", "", precio) or None)
+        estado[clave] = {
+            "en_stock": bool(info.get("en_stock")),
+            "precio": precio,
+            "precio_normal": info.get("precio_normal"),
+            "precio_avisado": info.get("precio_avisado"),
+        }
+    return estado
 
-    if "productos" in datos and "terminos_conocidos" in datos:
-        datos.setdefault("estilos_conocidos", [])
-        return datos
 
-    # Formato viejo (antes de agregar seguimiento por termino): todo lo que
-    # habia ahi se guardo cuando el unico termino era el de Jordan.
-    return {"terminos_conocidos": ["air jordan 4 retro"], "estilos_conocidos": [], "productos": datos}
-
-
-def guardar_estado(estado):
+def guardar_estado(productos):
     with open(ARCHIVO_ESTADO, "w", encoding="utf-8") as f:
-        json.dump(estado, f, ensure_ascii=False, indent=2)
+        json.dump({"version": 2, "productos": productos}, f, ensure_ascii=False, indent=2, sort_keys=True)
 
 
-def notificar_telegram(titulo, mensaje):
+def notificar_telegram(mensajes):
+    """Envia los mensajes (texto HTML). Devuelve False si alguno fallo."""
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        print("  [Telegram] faltan TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID, no se pudo avisar.")
-        return
-    texto = f"*{titulo}*\n{mensaje}"
-    try:
-        r = requests.post(
-            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
-            json={"chat_id": TELEGRAM_CHAT_ID, "text": texto, "parse_mode": "Markdown"},
-            timeout=15,
-        )
-        if r.status_code != 200:
-            print(f"  [Telegram] error HTTP {r.status_code}: {r.text[:200]}")
-    except Exception as e:
-        print(f"  [Telegram] error enviando notificacion: {e}")
+        print("  [Telegram] faltan TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID, no se aviso.")
+        return True
+    todo_ok = True
+    for texto in mensajes:
+        try:
+            r = requests.post(
+                f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+                json={"chat_id": TELEGRAM_CHAT_ID, "text": texto, "parse_mode": "HTML",
+                      "disable_web_page_preview": True},
+                timeout=15,
+            )
+            if r.status_code != 200:
+                print(f"  [Telegram] error HTTP {r.status_code}: {r.text[:300]}")
+                todo_ok = False
+        except Exception as e:
+            print(f"  [Telegram] error enviando notificacion: {e}")
+            todo_ok = False
+    return todo_ok
 
 
 def registrar_log(lineas):
+    marca = datetime.now(ZONA_CL).strftime("%Y-%m-%d %H:%M:%S")
     with open(ARCHIVO_LOG, "a", encoding="utf-8") as f:
-        from datetime import datetime
-        marca = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         for linea in lineas:
             f.write(f"[{marca}] {linea}\n")
+
+
+def armar_mensajes(eventos):
+    """Agrupa los eventos en mensajes de Telegram que no pasen el limite."""
+    bloques = []
+    for ev in eventos:
+        e = html.escape
+        tallas = ", ".join(
+            f"{t} ({fmt_clp(i['precio'])})" for t, i in sorted(ev["tallas"].items(), key=lambda x: float(x[0]))
+        )
+        precio_txt = fmt_clp(ev["precio"])
+        if ev["oferta"]:
+            dcto = round(100 * (1 - ev["precio"] / ev["precio_normal"]))
+            precio_txt = f"<b>{fmt_clp(ev['precio'])}</b> (antes {fmt_clp(ev['precio_normal'])}, -{dcto}%)"
+        bloques.append(
+            f"<b>{e(ev['tipo'])} · {e(ev['tienda'])}</b>\n"
+            f"{e(ev['nombre'])}\n"
+            f"Tallas US {e(tallas)}\n"
+            f"{precio_txt}\n"
+            f"{e(ev['link'] or '')}"
+        )
+
+    titulo = f"👟 <b>Vigia zapatillas — {len(eventos)} aviso(s)</b>"
+    mensajes, actual = [], titulo
+    for b in bloques:
+        if len(actual) + len(b) + 2 > TELEGRAM_MAX:
+            mensajes.append(actual)
+            actual = b
+        else:
+            actual += "\n\n" + b
+    mensajes.append(actual)
+    return mensajes
 
 
 def main():
     if not dentro_de_horario():
         print(f"Fuera del horario {HORA_INICIO}:00-{HORA_FIN}:00 (hora de Chile), no se revisa esta vez.")
-        return
+        return 0
 
     estado = cargar_estado()
-    productos_estado = estado["productos"]
-    estilos_conocidos = set(estado["estilos_conocidos"])
-    # "estilos_conocidos" es un campo nuevo: si viene vacio pero ya habia
-    # productos guardados de antes, es una migracion (no un primer arranque
-    # real) - hay que bautizar los estilos en silencio esta vez para no
-    # disparar un "NUEVO" falso por cada colorway que ya conociamos.
-    es_primera_vez_estilos = not estilos_conocidos and bool(productos_estado)
-    terminos_conocidos = set(estado["terminos_conocidos"])
-    terminos_nuevos_bautizados = []
-    nuevos = []      # colorways nunca vistos - avisa sin importar la talla
-    restocks = []    # talla objetivo que paso de agotada a disponible, en colorways YA conocidos
+    nuevo_estado = dict(estado)
+    eventos = []
+    busquedas_ok = busquedas_error = 0
 
     for config in CONFIGURACION_BUSQUEDA:
-        termino = config["termino"]
-        filtro_modelo = config["filtro_modelo"]
-        tallas_objetivo = config["tallas_objetivo"]
-        tallas_objetivo_txt = ", ".join(sorted(tallas_objetivo))
-        es_termino_nuevo = termino not in terminos_conocidos
-
         for nombre_tienda, buscador in TIENDAS:
             try:
-                productos = buscador(termino, filtro_modelo, tallas_objetivo)
+                productos = buscador(config["termino"], config["filtro_modelo"], config["tallas_objetivo"])
+                busquedas_ok += 1
             except Exception as e:
-                print(f"[{nombre_tienda}] error buscando '{termino}': {e}")
+                busquedas_error += 1
+                print(f"[{nombre_tienda}] error buscando '{config['termino']}': {e}")
                 continue
 
             for p in productos:
-                if not p["codigo"]:
-                    continue
-                clave_estilo = f"{nombre_tienda}|{p['codigo']}"
-                estilo_es_nuevo = clave_estilo not in estilos_conocidos
+                tallas_aviso = {}
+                tipos = set()
+                for talla in config["tallas_objetivo"]:
+                    clave = f"{nombre_tienda}|{p['codigo']}|{talla}"
+                    # Talla que ya no aparece en el producto = agotada.
+                    info = p["tallas"].get(talla) or {"en_stock": False, "precio": None, "precio_normal": None}
+                    anterior = estado.get(clave)
+                    # "precio_avisado" = ultimo precio de oferta que se aviso.
+                    # Se compara contra ese (no contra el ultimo visto) para no
+                    # avisar de nuevo si la oferta sube y luego baja un poco.
+                    # Se borra cuando la talla sale de oferta o se agota, asi
+                    # una oferta que vuelve despues se avisa otra vez.
+                    avisado = (anterior or {}).get("precio_avisado")
+                    if not (info["en_stock"] and en_oferta(info)):
+                        avisado = None
+                    info = dict(info, precio_avisado=avisado)
+                    nuevo_estado[clave] = info
+                    if not info["en_stock"]:
+                        continue
 
-                if not es_termino_nuevo and estilo_es_nuevo and not es_primera_vez_estilos:
-                    tallas_disponibles = [t["talla"] for t in p["tallas"] if t["en_stock"]]
-                    nuevos.append((nombre_tienda, {
+                    estaba_disponible = bool(anterior and anterior["en_stock"])
+                    if not estaba_disponible:
+                        tipos.add("DISPONIBLE")
+                    elif en_oferta(info) and (avisado is None or info["precio"] < avisado):
+                        tipos.add("OFERTA")
+                    else:
+                        continue
+                    tallas_aviso[talla] = info
+                    if en_oferta(info):
+                        info["precio_avisado"] = info["precio"]
+
+                if tallas_aviso:
+                    ref = min(tallas_aviso.values(), key=lambda i: i["precio"] or 10**9)
+                    oferta = en_oferta(ref)
+                    tipo = "DISPONIBLE" if "DISPONIBLE" in tipos else "OFERTA"
+                    if tipo == "DISPONIBLE" and oferta:
+                        tipo = "DISPONIBLE EN OFERTA"
+                    eventos.append({
+                        "tipo": tipo,
+                        "tienda": nombre_tienda,
+                        "modelo": config["modelo"],
                         "nombre": p["nombre"],
                         "link": p["link"],
-                        "precio": p["precio_base"],
-                        "tallas_disponibles": tallas_disponibles,
-                        "tallas_objetivo_txt": tallas_objetivo_txt,
-                    }))
-                estilos_conocidos.add(clave_estilo)
+                        "tallas": tallas_aviso,
+                        "precio": ref["precio"],
+                        "precio_normal": ref["precio_normal"],
+                        "oferta": oferta,
+                    })
 
-                for t in p["tallas"]:
-                    clave = f"{nombre_tienda}|{p['codigo']}|{t['talla']}"
-                    anterior = productos_estado.get(clave)
+    if busquedas_ok == 0:
+        print("Todas las busquedas fallaron: no se guarda nada en esta corrida.")
+        return 1
 
-                    if not es_termino_nuevo and not estilo_es_nuevo:
-                        if anterior is not None and anterior["en_stock"] is False and t["en_stock"] is True:
-                            restocks.append((nombre_tienda, {
-                                "nombre": f"{p['nombre']} (talla {t['talla']})",
-                                "link": p["link"],
-                                "precio": t["precio"],
-                            }))
+    # Ofertas primero, despues el resto.
+    eventos.sort(key=lambda ev: (not ev["oferta"], ev["modelo"], ev["tienda"]))
 
-                    productos_estado[clave] = {"en_stock": t["en_stock"], "precio": t["precio"]}
-
-        if es_termino_nuevo:
-            terminos_conocidos.add(termino)
-            terminos_nuevos_bautizados.append(termino)
-
-    estado["productos"] = productos_estado
-    estado["estilos_conocidos"] = sorted(estilos_conocidos)
-    estado["terminos_conocidos"] = sorted(terminos_conocidos)
-    guardar_estado(estado)
-
-    if es_primera_vez_estilos:
-        print(f"Migracion: se bautizaron {len(estilos_conocidos)} colorways ya conocidos en silencio "
-              "(no se avisa 'NUEVO' de ninguno esta vez).")
-
-    terminos_totales = {c["termino"] for c in CONFIGURACION_BUSQUEDA}
-    if terminos_nuevos_bautizados:
-        print("Termino(s) nuevo(s) agregados a CONFIGURACION_BUSQUEDA, se guardo su estado "
-              f"inicial sin avisar nada (recien empieza el seguimiento): {terminos_nuevos_bautizados}")
-        if not (terminos_totales - set(terminos_nuevos_bautizados)):
-            return
-
-    lineas_log = []
-    for tienda, p in nuevos:
-        tallas_txt = ", ".join(p["tallas_disponibles"]) if p["tallas_disponibles"] else f"sin stock en {p['tallas_objetivo_txt']} por ahora"
-        lineas_log.append(f"NUEVO  [{tienda}] {p['nombre']} | {p['precio']} | tallas {p['tallas_objetivo_txt']}: {tallas_txt} | {p['link']}")
-    for tienda, p in restocks:
-        lineas_log.append(f"RESTOCK [{tienda}] {p['nombre']} | {p['precio']} | {p['link']}")
-
-    if lineas_log:
-        registrar_log(lineas_log)
+    if eventos:
+        lineas_log = []
+        for ev in eventos:
+            tallas = ", ".join(sorted(ev["tallas"], key=float))
+            extra = f" (antes {fmt_clp(ev['precio_normal'])})" if ev["oferta"] else ""
+            lineas_log.append(
+                f"{ev['tipo']} [{ev['tienda']}] {ev['nombre']} | tallas {tallas} | "
+                f"{fmt_clp(ev['precio'])}{extra} | {ev['link']}"
+            )
         for linea in lineas_log:
             print(linea)
 
-        cuerpos = []
-        for tienda, p in restocks:
-            cuerpos.append(f"RESTOCK · {tienda}\n{p['nombre']}\n{p['precio']}\n{p['link']}")
-        for tienda, p in nuevos:
-            tallas_txt = ", ".join(p["tallas_disponibles"]) if p["tallas_disponibles"] else f"sin stock en {p['tallas_objetivo_txt']} por ahora (revisa otras tallas)"
-            cuerpos.append(f"NUEVO COLORWAY · {tienda}\n{p['nombre']}\nTallas {p['tallas_objetivo_txt']}: {tallas_txt}\n{p['precio']}\n{p['link']}")
-
-        total_eventos = len(restocks) + len(nuevos)
-        cuerpo = "\n\n".join(cuerpos[:10])
-        if total_eventos > 10:
-            cuerpo += f"\n\n(+{total_eventos - 10} mas, revisa el log)"
-        notificar_telegram(f"👟 Vigia Jordan/Bold — {total_eventos} novedad(es)", cuerpo)
+        if not notificar_telegram(armar_mensajes(eventos)):
+            print("No se pudo avisar por Telegram: no se guarda el estado para reintentar en la proxima corrida.")
+            return 1
+        registrar_log(lineas_log)
     else:
         print("Sin novedades en esta corrida.")
 
+    guardar_estado(nuevo_estado)
+    if busquedas_error:
+        print(f"Aviso: {busquedas_error} busqueda(s) fallaron en esta corrida (ver arriba).")
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
