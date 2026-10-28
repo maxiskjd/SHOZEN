@@ -1,6 +1,7 @@
 """
 SHOZEN: vigia de stock y ofertas para modelos configurados (Jordan 4 Retro, Puma
-180 / 180 Pro, Air Force 1 blancas, Puma Suede XL) en Bold, Moredrops y The Line.
+180 / 180 Pro, Air Force 1 blancas, Puma Suede XL) en Bold, Moredrops y The Line,
+y de productos sin talla (AirPods Pro 3) en unas 12 tiendas via Solotodo.
 
 Corre via GitHub Actions: cada corrida es independiente, compara contra el
 estado guardado en ARCHIVO_ESTADO y avisa por Telegram solo cuando, en una
@@ -108,6 +109,20 @@ CONFIGURACION_BUSQUEDA = [
 # Bold/Moredrops: "US 9 MEN" o, en modelos unisex, "US 4.5 UNSX" (misma escala).
 FILTRO_TALLA_OCC = re.compile(r"US\s+([\d.]+)\s+(?:MEN|UNSX)\b", re.I)
 MAX_PAGINAS = 8  # tope de paginas de 50 resultados por busqueda
+
+# Productos sin talla que se siguen en Solotodo (comparador que revisa unas 12
+# tiendas: las grandes cada ~30 min, las chicas ~1 vez al dia). Avisa cuando
+# alguna tienda lo tiene con stock a "precio_maximo" o menos (precio normal,
+# sin tarjeta de la tienda) y otra vez si baja mas desde el ultimo aviso.
+PRODUCTOS_SOLOTODO = [
+    {
+        "modelo": "AirPods Pro 3",
+        "solotodo_id": 355272,  # https://www.solotodo.cl/products/355272
+        # Precio habitual ~$249.990; minimos historicos ~$199.990 (CyberDay,
+        # Paris en oct-2026).
+        "precio_maximo": 229990,
+    },
+]
 
 CARPETA = Path(__file__).resolve().parent
 ARCHIVO_ESTADO = CARPETA / "shozen_estado.json"
@@ -280,6 +295,38 @@ def buscar_theline(termino, filtro_modelo, tallas_objetivo):
     return resultado
 
 
+def buscar_solotodo(producto_id):
+    """Una entrada por publicacion (tienda) del producto en Solotodo."""
+    base = "https://publicapi.solotodo.com"
+    r = requests.get(f"{base}/products/available_entities/?ids={producto_id}",
+                     headers=HEADERS, timeout=TIMEOUT)
+    r.raise_for_status()
+    resultados = r.json().get("results") or []
+    entidades = resultados[0].get("entities", []) if resultados else []
+    nombres_tienda = {}
+    resultado = []
+    for e in entidades:
+        registro = e.get("active_registry") or {}
+        tienda_id = e.get("store_id")
+        if tienda_id not in nombres_tienda:
+            try:
+                rs = requests.get(f"{base}/stores/{tienda_id}/", headers=HEADERS, timeout=TIMEOUT)
+                rs.raise_for_status()
+                nombres_tienda[tienda_id] = rs.json().get("name") or f"tienda {tienda_id}"
+            except Exception:
+                nombres_tienda[tienda_id] = f"tienda {tienda_id}"
+        resultado.append({
+            "codigo": str(e.get("id")),
+            "tienda": nombres_tienda[tienda_id],
+            "nombre": limpiar_nombre(e.get("name")),
+            "link": e.get("external_url") or "",
+            "en_stock": bool(registro.get("is_available")),
+            "precio": a_entero(registro.get("normal_price")),
+            "precio_tarjeta": a_entero(registro.get("offer_price")),
+        })
+    return resultado
+
+
 TIENDAS = [
     ("Bold", lambda t, f, ta: buscar_occ(t, "boldb2cstore", "https://www.bold.cl", f, ta)),
     ("Moredrops", lambda t, f, ta: buscar_occ(t, "dropsb2cstore", "https://www.moredrops.cl", f, ta)),
@@ -360,13 +407,16 @@ def armar_mensajes(eventos):
             f"{t} ({fmt_clp(i['precio'])})" for t, i in sorted(ev["tallas"].items(), key=lambda x: float(x[0]))
         )
         precio_txt = fmt_clp(ev["precio"])
-        if ev["oferta"]:
+        if ev.get("detalle"):
+            precio_txt = ev["detalle"]
+        elif ev["oferta"]:
             dcto = round(100 * (1 - ev["precio"] / ev["precio_normal"]))
             precio_txt = f"<b>{fmt_clp(ev['precio'])}</b> (antes {fmt_clp(ev['precio_normal'])}, -{dcto}%)"
+        linea_tallas = f"Tallas US {e(tallas)}\n" if tallas else ""
         bloques.append(
             f"<b>{e(ev['tipo'])} · {e(ev['tienda'])}</b>\n"
             f"{e(ev['nombre'])}\n"
-            f"Tallas US {e(tallas)}\n"
+            f"{linea_tallas}"
             f"{precio_txt}\n"
             f"{e(ev['link'] or '')}"
         )
@@ -455,6 +505,42 @@ def main():
                         "oferta": oferta,
                     })
 
+    for producto in PRODUCTOS_SOLOTODO:
+        try:
+            publicaciones = buscar_solotodo(producto["solotodo_id"])
+            busquedas_ok += 1
+        except Exception as e:
+            busquedas_error += 1
+            print(f"[Solotodo] error buscando '{producto['modelo']}': {e}")
+            continue
+        maximo = producto["precio_maximo"]
+        for p in publicaciones:
+            clave = f"Solotodo|{p['codigo']}|-"
+            anterior = estado.get(clave) or {}
+            oferta = bool(p["en_stock"] and p["precio"] and p["precio"] <= maximo)
+            avisado = anterior.get("precio_avisado") if oferta else None
+            info = {"en_stock": p["en_stock"], "precio": p["precio"],
+                    "precio_normal": None, "precio_avisado": avisado}
+            nuevo_estado[clave] = info
+            if not oferta or (avisado is not None and p["precio"] >= avisado):
+                continue
+            info["precio_avisado"] = p["precio"]
+            tarjeta = ""
+            if p["precio_tarjeta"] and p["precio_tarjeta"] < p["precio"]:
+                tarjeta = f", con tarjeta de la tienda {fmt_clp(p['precio_tarjeta'])}"
+            eventos.append({
+                "tipo": "OFERTA",
+                "tienda": p["tienda"],
+                "modelo": producto["modelo"],
+                "nombre": f"{producto['modelo']} ({p['nombre']})",
+                "link": p["link"],
+                "tallas": {},
+                "precio": p["precio"],
+                "precio_normal": None,
+                "oferta": True,
+                "detalle": f"<b>{fmt_clp(p['precio'])}</b> (tu tope: {fmt_clp(maximo)}{tarjeta})",
+            })
+
     if busquedas_ok == 0:
         print("Todas las busquedas fallaron: no se guarda nada en esta corrida.")
         return 1
@@ -466,9 +552,9 @@ def main():
         lineas_log = []
         for ev in eventos:
             tallas = ", ".join(sorted(ev["tallas"], key=float))
-            extra = f" (antes {fmt_clp(ev['precio_normal'])})" if ev["oferta"] else ""
+            extra = f" (antes {fmt_clp(ev['precio_normal'])})" if ev["oferta"] and ev["precio_normal"] else ""
             lineas_log.append(
-                f"{ev['tipo']} [{ev['tienda']}] {ev['nombre']} | tallas {tallas} | "
+                f"{ev['tipo']} [{ev['tienda']}] {ev['nombre']} | tallas {tallas or '-'} | "
                 f"{fmt_clp(ev['precio'])}{extra} | {ev['link']}"
             )
         for linea in lineas_log:

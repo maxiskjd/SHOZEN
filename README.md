@@ -14,6 +14,16 @@ Modelos vigilados (productos de hombre o unisex, tallas US de hombre):
 | Air Force 1 blancas (solo ofertas) | 8.5, 9 |
 | Puma Suede XL, para mujer en escala unisex (solo ofertas) | 4.5, 5 |
 
+Productos sin talla, seguidos en [Solotodo](https://www.solotodo.cl) (comparador
+que revisa unas 12 tiendas: Ripley, Falabella, Paris, Lider, Mercado Libre,
+MacOnline, etc.; las grandes cada ~30 min, las chicas ~1 vez al dia):
+
+| Producto | Avisa cuando una tienda lo tiene a |
+| --- | --- |
+| AirPods Pro 3 | $229.990 o menos (precio normal, sin tarjeta de la tienda) |
+
+El tope se cambia en `PRODUCTOS_SOLOTODO` dentro de `shozen.py`.
+
 ## Configuracion inicial (una sola vez)
 
 1. En este repo, ve a **Settings > Secrets and variables > Actions > New
