@@ -1,4 +1,4 @@
-name: Vigia Jordan/Bold
+name: SHOZEN
 
 on:
   schedule:
@@ -12,11 +12,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: vigia-jordan-bold
+  group: shozen
   cancel-in-progress: false
 
 jobs:
-  vigia:
+  shozen:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,16 +27,16 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Correr vigia
+      - name: Correr SHOZEN
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python vigia_jordan_bold.py
+        run: python shozen.py
 
       - name: Guardar estado actualizado
         run: |
-          git config user.name "vigia-bot"
+          git config user.name "shozen-bot"
           git config user.email "actions@github.com"
-          git add vigia_jordan_estado.json vigia_jordan_log.txt
-          git diff --staged --quiet || git commit -m "Actualiza estado del vigia [skip ci]"
+          git add shozen_estado.json shozen_log.txt
+          git diff --staged --quiet || git commit -m "Actualiza estado de SHOZEN [skip ci]"
           git push

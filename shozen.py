@@ -1,16 +1,17 @@
 """
-Vigia de stock y ofertas para modelos configurados (Jordan 4 Retro, Puma
+SHOZEN: vigia de stock y ofertas para modelos configurados (Jordan 4 Retro, Puma
 180 / 180 Pro, Air Force 1 blancas) en Bold, Moredrops y The Line.
 
 Corre via GitHub Actions: cada corrida es independiente, compara contra el
 estado guardado en ARCHIVO_ESTADO y avisa por Telegram solo cuando, en una
 de las tallas objetivo (US hombre):
-  - DISPONIBLE: la talla paso de agotada (o nunca vista) a tener stock.
+  - DISPONIBLE: la talla paso de agotada (o nunca vista) a tener stock
+    (salvo en modelos con "solo_ofertas", que solo avisan en oferta).
   - OFERTA: la talla tiene stock y entro en descuento, o el precio de oferta
     bajo todavia mas desde el ultimo aviso.
 Fuera del horario 8:00-23:00 (hora de Chile) no revisa nada.
 
-Uso manual: python vigia_jordan_bold.py
+Uso manual: python shozen.py
 Requiere TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID para avisar (si no estan,
 igual revisa y deja el log, pero no notifica).
 
@@ -85,6 +86,8 @@ CONFIGURACION_BUSQUEDA = [
         "termino": "air force 1",
         "filtro_modelo": es_air_force_1_blanca,
         "tallas_objetivo": {"8.5", "9"},
+        # Casi siempre hay stock: avisar solo cuando esten en oferta.
+        "solo_ofertas": True,
     },
 ]
 
@@ -92,8 +95,8 @@ FILTRO_TALLA_OCC = re.compile(r"US\s+([\d.]+)\s+MEN\b", re.I)
 MAX_PAGINAS = 8  # tope de paginas de 50 resultados por busqueda
 
 CARPETA = Path(__file__).resolve().parent
-ARCHIVO_ESTADO = CARPETA / "vigia_jordan_estado.json"
-ARCHIVO_LOG = CARPETA / "vigia_jordan_log.txt"
+ARCHIVO_ESTADO = CARPETA / "shozen_estado.json"
+ARCHIVO_LOG = CARPETA / "shozen_log.txt"
 
 HEADERS = {
     "User-Agent": (
@@ -353,7 +356,7 @@ def armar_mensajes(eventos):
             f"{e(ev['link'] or '')}"
         )
 
-    titulo = f"👟 <b>Vigia zapatillas — {len(eventos)} aviso(s)</b>"
+    titulo = f"👟 <b>SHOZEN — {len(eventos)} aviso(s)</b>"
     mensajes, actual = [], titulo
     for b in bloques:
         if len(actual) + len(b) + 2 > TELEGRAM_MAX:
@@ -407,6 +410,8 @@ def main():
                         continue
 
                     estaba_disponible = bool(anterior and anterior["en_stock"])
+                    if config.get("solo_ofertas") and not en_oferta(info):
+                        continue
                     if not estaba_disponible:
                         tipos.add("DISPONIBLE")
                     elif en_oferta(info) and (avisado is None or info["precio"] < avisado):

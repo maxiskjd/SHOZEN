@@ -1,7 +1,7 @@
-# Vigia Jordan/Bold
+# SHOZEN
 
 Revisa Bold, Moredrops y The Line buscando stock y ofertas de los modelos en
-`CONFIGURACION_BUSQUEDA` (dentro de `vigia_jordan_bold.py`) y avisa por
+`CONFIGURACION_BUSQUEDA` (dentro de `shozen.py`) y avisa por
 Telegram. Corre en GitHub Actions entre 8:00 y 23:00 (hora de Chile), sin
 depender de que ningun PC este prendido.
 
@@ -23,15 +23,16 @@ Modelos vigilados (solo productos de hombre, tallas US):
 2. Verifica que las Actions esten habilitadas: pestaña **Actions** del repo.
 
 3. (Opcional) Corre el workflow a mano una vez para probar: pestaña
-   **Actions > Vigia Jordan/Bold > Run workflow**.
+   **Actions > SHOZEN > Run workflow**.
 
 ## Como funciona
 
 - Cada corrida es independiente; el estado (stock y precio de cada talla
-  objetivo) se guarda en `vigia_jordan_estado.json` y el propio workflow lo
+  objetivo) se guarda en `shozen_estado.json` y el propio workflow lo
   commitea de vuelta al repo al final de cada corrida.
 - Avisa por Telegram solo sobre las tallas objetivo:
-  - **DISPONIBLE**: la talla paso de agotada (o nunca vista) a tener stock.
+  - **DISPONIBLE**: la talla paso de agotada (o nunca vista) a tener stock
+    (salvo en modelos con `"solo_ofertas": True`, como las Air Force 1).
   - **OFERTA**: la talla tiene stock y entro en descuento, o el precio de
     oferta bajo mas desde el ultimo aviso.
 - Si Telegram rechaza el aviso, la corrida queda en rojo (GitHub te manda
@@ -39,6 +40,6 @@ Modelos vigilados (solo productos de hombre, tallas US):
 
 ## Agregar mas modelos a vigilar
 
-Agrega una entrada a `CONFIGURACION_BUSQUEDA` en `vigia_jordan_bold.py` (termino
+Agrega una entrada a `CONFIGURACION_BUSQUEDA` en `shozen.py` (termino
 de busqueda, filtro sobre el nombre y tallas), haz commit y push. La primera
 corrida avisa de todo lo que ya este disponible en esas tallas.
