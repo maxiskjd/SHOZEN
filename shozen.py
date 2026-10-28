@@ -1,6 +1,6 @@
 """
 SHOZEN: vigia de stock y ofertas para modelos configurados (Jordan 4 Retro, Puma
-180 / 180 Pro, Air Force 1 blancas) en Bold, Moredrops y The Line.
+180 / 180 Pro, Air Force 1 blancas, Puma Suede XL) en Bold, Moredrops y The Line.
 
 Corre via GitHub Actions: cada corrida es independiente, compara contra el
 estado guardado en ARCHIVO_ESTADO y avisa por Telegram solo cuando, en una
@@ -56,6 +56,11 @@ def es_puma_180(nombre, color):
     return _tiene(r"\bpuma\b", nombre) and _tiene(r"\b180\b", nombre)
 
 
+def es_puma_suede_xl(nombre, color):
+    return (_tiene(r"\bsuede\b", nombre) and _tiene(r"\bxl\b", nombre)
+            and _tiene(r"zapatilla", nombre))
+
+
 def es_air_force_1_blanca(nombre, color):
     if not (_tiene(r"\bair force 1\b", nombre) and _tiene(r"zapatilla", nombre)):
         return False
@@ -89,9 +94,19 @@ CONFIGURACION_BUSQUEDA = [
         # Casi siempre hay stock: avisar solo cuando esten en oferta.
         "solo_ofertas": True,
     },
+    {
+        # Para mujer, pero en escala unisex/hombre (como Bold: "US 4.5 UNSX");
+        # por eso los modelos "mujer", que usan otra escala, quedan fuera.
+        "modelo": "Puma Suede XL",
+        "termino": "suede xl",
+        "filtro_modelo": es_puma_suede_xl,
+        "tallas_objetivo": {"4.5", "5"},
+        "solo_ofertas": True,
+    },
 ]
 
-FILTRO_TALLA_OCC = re.compile(r"US\s+([\d.]+)\s+MEN\b", re.I)
+# Bold/Moredrops: "US 9 MEN" o, en modelos unisex, "US 4.5 UNSX" (misma escala).
+FILTRO_TALLA_OCC = re.compile(r"US\s+([\d.]+)\s+(?:MEN|UNSX)\b", re.I)
 MAX_PAGINAS = 8  # tope de paginas de 50 resultados por busqueda
 
 CARPETA = Path(__file__).resolve().parent

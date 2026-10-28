@@ -5,13 +5,14 @@ Revisa Bold, Moredrops y The Line buscando stock y ofertas de los modelos en
 Telegram. Corre en GitHub Actions entre 8:00 y 23:00 (hora de Chile), sin
 depender de que ningun PC este prendido.
 
-Modelos vigilados (solo productos de hombre, tallas US):
+Modelos vigilados (productos de hombre o unisex, tallas US de hombre):
 
 | Modelo | Tallas |
 | --- | --- |
 | Jordan 4 Retro | 8.5, 9 |
 | Puma 180 / 180 Pro | 10 |
-| Air Force 1 blancas | 8.5, 9 |
+| Air Force 1 blancas (solo ofertas) | 8.5, 9 |
+| Puma Suede XL, para mujer en escala unisex (solo ofertas) | 4.5, 5 |
 
 ## Configuracion inicial (una sola vez)
 
