@@ -86,7 +86,13 @@
     },
     "Bold|NIIM4002100|8.5": {
       "en_stock": false,
-      "precio": 226990,
+      "precio": null,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Bold|NIIM4002100|9": {
+      "en_stock": false,
+      "precio": null,
       "precio_avisado": null,
       "precio_normal": null
     },
