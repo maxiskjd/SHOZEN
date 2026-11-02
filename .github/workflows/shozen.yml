@@ -1,14 +1,11 @@
 name: SHOZEN
 
 on:
-  schedule:
-    # cada 15 min, entre 11:00 y 04:00 UTC (cubre 8:00-23:00 hora de Chile
-    # con margen para el cambio de horario de verano; el script mismo
-    # vuelve a chequear la hora exacta y no hace nada fuera de rango).
-    # Minutos 7/22/37/52 y no 0/15/30/45: GitHub retrasa o salta las
-    # ejecuciones en los cuartos de hora, que es cuando mas carga tiene.
-    - cron: "7,22,37,52 11-23,0-4 * * *"
-  workflow_dispatch: {}  # permite correrlo a mano desde la pestaña Actions
+  # Lo activa cron-job.org (tarea "SHOZEN") cada 15 min de 8:00 a 22:45 hora
+  # de Chile, con un POST a la API de GitHub (workflow_dispatch). Se dejo de
+  # usar "schedule" porque GitHub saltaba ejecuciones (habia horas sin correr).
+  # Tambien se puede correr a mano desde la pestaña Actions.
+  workflow_dispatch: {}
 
 permissions:
   contents: write
