@@ -112,8 +112,10 @@ MAX_PAGINAS = 8  # tope de paginas de 50 resultados por busqueda
 
 # Productos sin talla que se siguen en Solotodo (comparador que revisa unas 12
 # tiendas: las grandes cada ~30 min, las chicas ~1 vez al dia). Avisa cuando
-# alguna tienda lo tiene con stock a "precio_maximo" o menos (precio normal,
-# sin tarjeta de la tienda) y otra vez si baja mas desde el ultimo aviso.
+# alguna tienda lo tiene con stock en oferta (precio normal, sin tarjeta de la
+# tienda) y otra vez si baja mas desde el ultimo aviso. Oferta es:
+#   - "precio_maximo": precio igual o menor a ese tope, o
+#   - "precio_referencia": precio menor a ese (ej. el precio oficial de Apple).
 PRODUCTOS_SOLOTODO = [
     {
         "modelo": "AirPods Pro 3",
@@ -121,6 +123,19 @@ PRODUCTOS_SOLOTODO = [
         # Precio habitual ~$249.990; minimos historicos ~$199.990 (CyberDay,
         # Paris en oct-2026).
         "precio_maximo": 229990,
+    },
+    {
+        "modelo": "AirPods 5",
+        "solotodo_id": 406262,  # https://www.solotodo.cl/products/406262
+        "precio_referencia": 159990,  # precio oficial Apple Chile
+    },
+    {
+        "modelo": "AirPods 5 (carga inalambrica)",
+        "solotodo_id": 406261,  # https://www.solotodo.cl/products/406261
+        "precio_referencia": 179990,  # precio oficial Apple Chile
+        # Solotodo mezcla aqui publicaciones de la version normal (ej. ABC
+        # "con estuche USB-C", Ripley "AIRPODS 5 AME"): darian ofertas falsas.
+        "filtro_nombre": re.compile(r"inal[aá]mbric|charging|magsafe|wireless", re.I),
     },
 ]
 
@@ -513,11 +528,17 @@ def main():
             busquedas_error += 1
             print(f"[Solotodo] error buscando '{producto['modelo']}': {e}")
             continue
-        maximo = producto["precio_maximo"]
+        maximo = producto.get("precio_maximo")
+        referencia = producto.get("precio_referencia")
+        filtro = producto.get("filtro_nombre")
         for p in publicaciones:
+            if filtro and not filtro.search(p["nombre"] or ""):
+                continue
             clave = f"Solotodo|{p['codigo']}|-"
             anterior = estado.get(clave) or {}
-            oferta = bool(p["en_stock"] and p["precio"] and p["precio"] <= maximo)
+            precio = p["precio"]
+            oferta = bool(p["en_stock"] and precio and (
+                (maximo and precio <= maximo) or (referencia and precio < referencia)))
             avisado = anterior.get("precio_avisado") if oferta else None
             info = {"en_stock": p["en_stock"], "precio": p["precio"],
                     "precio_normal": None, "precio_avisado": avisado}
@@ -528,6 +549,12 @@ def main():
             tarjeta = ""
             if p["precio_tarjeta"] and p["precio_tarjeta"] < p["precio"]:
                 tarjeta = f", con tarjeta de la tienda {fmt_clp(p['precio_tarjeta'])}"
+            if referencia:
+                dcto = round(100 * (1 - p["precio"] / referencia))
+                detalle = (f"<b>{fmt_clp(p['precio'])}</b> (precio Apple {fmt_clp(referencia)}, "
+                           f"-{dcto}%{tarjeta})")
+            else:
+                detalle = f"<b>{fmt_clp(p['precio'])}</b> (tu tope: {fmt_clp(maximo)}{tarjeta})"
             eventos.append({
                 "tipo": "OFERTA",
                 "tienda": p["tienda"],
@@ -538,7 +565,7 @@ def main():
                 "precio": p["precio"],
                 "precio_normal": None,
                 "oferta": True,
-                "detalle": f"<b>{fmt_clp(p['precio'])}</b> (tu tope: {fmt_clp(maximo)}{tarjeta})",
+                "detalle": detalle,
             })
 
     if busquedas_ok == 0:
