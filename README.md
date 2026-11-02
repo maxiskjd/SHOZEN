@@ -2,8 +2,9 @@
 
 Revisa Bold, Moredrops y The Line buscando stock y ofertas de los modelos en
 `CONFIGURACION_BUSQUEDA` (dentro de `shozen.py`) y avisa por
-Telegram. Corre en GitHub Actions entre 8:00 y 23:00 (hora de Chile), sin
-depender de que ningun PC este prendido.
+Telegram. Corre en GitHub Actions cada 15 minutos entre 8:00 y 22:45 (hora
+de Chile), activado por [cron-job.org](https://cron-job.org), sin depender de
+que ningun PC este prendido (ver "Cuando corre").
 
 Modelos vigilados (productos de hombre o unisex, tallas US de hombre):
 
@@ -18,11 +19,23 @@ Productos sin talla, seguidos en [Solotodo](https://www.solotodo.cl) (comparador
 que revisa unas 12 tiendas: Ripley, Falabella, Paris, Lider, Mercado Libre,
 MacOnline, etc.; las grandes cada ~30 min, las chicas ~1 vez al dia):
 
-| Producto | Avisa cuando una tienda lo tiene a |
-| --- | --- |
-| AirPods Pro 3 | $229.990 o menos (precio normal, sin tarjeta de la tienda) |
+| Producto | Solotodo | Avisa cuando una tienda lo tiene a |
+| --- | --- | --- |
+| AirPods Pro 3 | 355272 | $229.990 o menos |
+| AirPods 5 (estuche USB-C) | 406262 | menos de $159.990 (precio Apple) |
+| AirPods 5 (carga inalambrica) | 406261 | menos de $179.990 (precio Apple) |
 
-El tope se cambia en `PRODUCTOS_SOLOTODO` dentro de `shozen.py`.
+Siempre se compara el precio normal, sin tarjeta de la tienda; el precio con
+tarjeta solo se muestra en el aviso. Cada producto en `PRODUCTOS_SOLOTODO`
+(dentro de `shozen.py`) usa una de dos reglas:
+
+- `precio_maximo`: avisa si el precio es igual o menor a ese tope.
+- `precio_referencia`: avisa si el precio es menor a ese (ej. el precio
+  oficial de Apple) y muestra el % de descuento.
+
+Opcional, `filtro_nombre`: ignora publicaciones cuyo nombre no calce. Lo usa
+la version inalambrica de AirPods 5 porque Solotodo mezcla ahi publicaciones
+de la version normal, que darian ofertas falsas.
 
 ## Configuracion inicial (una sola vez)
 
@@ -35,6 +48,39 @@ El tope se cambia en `PRODUCTOS_SOLOTODO` dentro de `shozen.py`.
 
 3. (Opcional) Corre el workflow a mano una vez para probar: pestaña
    **Actions > SHOZEN > Run workflow**.
+
+4. Configura cron-job.org (ver "Cuando corre").
+
+## Cuando corre
+
+El workflow (`.github/workflows/shozen.yml`) **no tiene horario propio**: solo
+se ejecuta con `workflow_dispatch`. Antes usaba `schedule` de GitHub Actions,
+pero GitHub se saltaba ejecuciones y pasaban horas sin correr.
+
+Ahora lo activa una tarea en cron-job.org:
+
+- **URL:** `https://api.github.com/repos/maxiskjd/SHOZEN/actions/workflows/shozen.yml/dispatches`
+- **Horario:** minutos 0, 15, 30 y 45, de las 8 a las 22, zona horaria
+  `America/Santiago` (sigue solo el cambio de horario de verano).
+- **Metodo:** `POST`, con body `{"ref":"main"}`.
+- **Headers:**
+  - `Authorization: Bearer <token>`
+  - `Accept: application/vnd.github+json`
+  - `X-GitHub-Api-Version: 2022-11-28`
+- Una prueba correcta responde **204**. Un 401 es token mal puesto; un 404,
+  token sin acceso al repo o sin permiso de Actions.
+
+El token es un fine-grained personal access token de GitHub con acceso solo a
+este repo y el permiso **Actions: Read and write** (nada mas). Vence al año:
+cuando venza el bot deja de correr; hay que regenerarlo en
+https://github.com/settings/personal-access-tokens y pegar el nuevo en
+cron-job.org. Nunca lo subas a este repo.
+
+El script igual revisa la hora de Chile y no hace nada fuera de 8:00-23:00,
+asi que una corrida a mano fuera de horario no avisa.
+
+Costo: el repo es privado (2.000 minutos gratis al mes de Actions) y cada
+corrida cuenta como al menos 1 minuto. 60 corridas al dia son ~1.800 min/mes.
 
 ## Como funciona
 
