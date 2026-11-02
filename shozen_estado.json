@@ -139,9 +139,9 @@
       "precio_normal": 134990
     },
     "Bold|NIIV2857100|9": {
-      "en_stock": true,
+      "en_stock": false,
       "precio": 94990,
-      "precio_avisado": 94990,
+      "precio_avisado": null,
       "precio_normal": 134990
     },
     "Bold|PM39520502|4.5": {
