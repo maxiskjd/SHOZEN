@@ -35,3 +35,9 @@
 [2026-10-23 15:00:30] DISPONIBLE [The Line] ZAPATILLA NIKE AIR FORCE 1 07 HOMBRE | tallas 8.5, 9 | $119.990 | https://www.theline.cl/cw2288-111-air-force-1--07/p
 [2026-10-28 13:59:48] DISPONIBLE [The Line] ZAPATILLA NIKE AIR FORCE 1 LOW EVO HOMBRE | tallas 9 | $149.990 | https://www.theline.cl/hf3630-101--1/p
 [2026-10-29 14:20:03] OFERTA [Bold] Air Force 1 '07 Premium Zapatillas Nike Hombre Blanco | tallas 8.5, 9 | $94.990 (antes $134.990) | https://www.bold.cl/Categories/Genero/Hombre/Calzado-Hombre/Zapatillas-Hombre/Air-Force-1-%2707-Premium-Zapatillas-Nike-Hombre-Blanco/p/NIIV2857100
+[2026-11-02 14:00:05] OFERTA [Paris] AirPods 5 (Apple Apple AirPods 5) | tallas - | $154.990 | https://www.paris.cl/apple-airpods-5-605631999.html
+[2026-11-02 14:00:05] OFERTA [ABC] AirPods 5 (carga inalambrica) (Apple AirPods 5 con estuche de carga inalámbrica Blanco) | tallas - | $174.990 | https://www.abc.cl/apple-airpods-5-con-estuche-de-carga-inalambrica-blanco/29639426.html
+[2026-11-02 14:00:05] OFERTA [Mercado Libre] AirPods 5 (carga inalambrica) (Apple AirPods 5 con estuche de carga inalámbrica - Distribuidor Autorizado) | tallas - | $173.875 | https://www.mercadolibre.cl/p/MLC1077832768?pdp_filters=official_store:all
+[2026-11-02 14:00:05] OFERTA [Paris] AirPods 5 (carga inalambrica) (Apple Apple AirPods 5 con Carga Inalámbrica) | tallas - | $174.990 | https://www.paris.cl/apple-airpods-5-con-carga-inalambrica-605623999.html
+[2026-11-02 14:00:05] OFERTA [Ripley] AirPods 5 (carga inalambrica) (AIRPODS 5 CHARGING (Blanco)) | tallas - | $169.990 | https://simple.ripley.cl/airpods-5-charging-2000412935011p
+[2026-11-02 14:00:05] DISPONIBLE EN OFERTA [The Line] ZAPATILLA PUMA PUMA-180 PRO HOMBRE | tallas 10 | $54.990 (antes $94.990) | https://www.theline.cl/404472-01-11-5/p

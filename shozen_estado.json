@@ -38,9 +38,9 @@
     },
     "Bold|NIFJ4146123|8.5": {
       "en_stock": false,
-      "precio": 122990,
+      "precio": null,
       "precio_avisado": null,
-      "precio_normal": 122990
+      "precio_normal": null
     },
     "Bold|NIFJ4146123|9": {
       "en_stock": false,
@@ -50,9 +50,9 @@
     },
     "Bold|NIHQ2037100|8.5": {
       "en_stock": false,
-      "precio": 91990,
+      "precio": null,
       "precio_avisado": null,
-      "precio_normal": 132990
+      "precio_normal": null
     },
     "Bold|NIHQ2037100|9": {
       "en_stock": false,
@@ -140,9 +140,9 @@
     },
     "Bold|NIIV2857100|9": {
       "en_stock": false,
-      "precio": 94990,
+      "precio": null,
       "precio_avisado": null,
-      "precio_normal": 134990
+      "precio_normal": null
     },
     "Bold|PM39520502|4.5": {
       "en_stock": true,
@@ -324,6 +324,108 @@
       "precio_avisado": null,
       "precio_normal": null
     },
+    "Solotodo|2335268|-": {
+      "en_stock": true,
+      "precio": 179990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2335269|-": {
+      "en_stock": true,
+      "precio": 159990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2336367|-": {
+      "en_stock": true,
+      "precio": 174990,
+      "precio_avisado": 174990,
+      "precio_normal": null
+    },
+    "Solotodo|2336368|-": {
+      "en_stock": true,
+      "precio": 154990,
+      "precio_avisado": 154990,
+      "precio_normal": null
+    },
+    "Solotodo|2336441|-": {
+      "en_stock": true,
+      "precio": 169990,
+      "precio_avisado": 169990,
+      "precio_normal": null
+    },
+    "Solotodo|2336950|-": {
+      "en_stock": true,
+      "precio": 173875,
+      "precio_avisado": 173875,
+      "precio_normal": null
+    },
+    "Solotodo|2336962|-": {
+      "en_stock": true,
+      "precio": 159990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2342598|-": {
+      "en_stock": true,
+      "precio": 174990,
+      "precio_avisado": 174990,
+      "precio_normal": null
+    },
+    "Solotodo|2343244|-": {
+      "en_stock": true,
+      "precio": 179990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2343245|-": {
+      "en_stock": true,
+      "precio": 159990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2343940|-": {
+      "en_stock": true,
+      "precio": 179990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2345270|-": {
+      "en_stock": true,
+      "precio": 161990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2345466|-": {
+      "en_stock": true,
+      "precio": 179990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2345483|-": {
+      "en_stock": true,
+      "precio": 159990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2347964|-": {
+      "en_stock": true,
+      "precio": 170240,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2356324|-": {
+      "en_stock": true,
+      "precio": 160990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
+    "Solotodo|2357593|-": {
+      "en_stock": true,
+      "precio": 159990,
+      "precio_avisado": null,
+      "precio_normal": null
+    },
     "The Line|11528|4.5": {
       "en_stock": false,
       "precio": null,
@@ -335,6 +437,12 @@
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
+    },
+    "The Line|12217|10": {
+      "en_stock": true,
+      "precio": 54990,
+      "precio_avisado": 54990,
+      "precio_normal": 94990
     },
     "The Line|12218|10": {
       "en_stock": true,
