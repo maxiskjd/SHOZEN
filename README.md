@@ -21,17 +21,16 @@ MacOnline, etc.; las grandes cada ~30 min, las chicas ~1 vez al dia):
 
 | Producto | Solotodo | Avisa cuando una tienda lo tiene a |
 | --- | --- | --- |
-| AirPods Pro 3 | 355272 | $229.990 o menos |
+| AirPods Pro 3 | 355272 | menos de $299.990 (precio Apple) |
 | AirPods 5 (estuche USB-C) | 406262 | menos de $159.990 (precio Apple) |
 | AirPods 5 (carga inalambrica) | 406261 | menos de $179.990 (precio Apple) |
 
-Siempre se compara el precio normal, sin tarjeta de la tienda; el precio con
-tarjeta solo se muestra en el aviso. Cada producto en `PRODUCTOS_SOLOTODO`
-(dentro de `shozen.py`) usa una de dos reglas:
-
-- `precio_maximo`: avisa si el precio es igual o menor a ese tope.
-- `precio_referencia`: avisa si el precio es menor a ese (ej. el precio
-  oficial de Apple) y muestra el % de descuento.
+Siempre se compara el precio normal, sin tarjeta de la tienda, contra
+`precio_referencia` (el precio oficial de Apple Chile) en `PRODUCTOS_SOLOTODO`,
+dentro de `shozen.py`. El aviso muestra el % de descuento y, si existe, el
+precio con tarjeta de la tienda. Avisa de nuevo si el precio baja mas. Si un
+producto sale de oferta y vuelve al mismo precio dentro de 24 horas, no
+repite el aviso (`MEMORIA_AVISO`).
 
 Opcional, `filtro_nombre`: ignora publicaciones cuyo nombre no calce. Lo usa
 la version inalambrica de AirPods 5 porque Solotodo mezcla ahi publicaciones

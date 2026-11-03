@@ -1,7 +1,7 @@
 """
 SHOZEN: vigia de stock y ofertas para modelos configurados (Jordan 4 Retro, Puma
 180 / 180 Pro, Air Force 1 blancas, Puma Suede XL) en Bold, Moredrops y The Line,
-y de productos sin talla (AirPods Pro 3) en unas 12 tiendas via Solotodo.
+y de productos sin talla (AirPods Pro 3 y AirPods 5) en unas 12 tiendas via Solotodo.
 
 Corre via GitHub Actions: cada corrida es independiente, compara contra el
 estado guardado en ARCHIVO_ESTADO y avisa por Telegram solo cuando, en una
@@ -26,7 +26,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -113,16 +113,15 @@ MAX_PAGINAS = 8  # tope de paginas de 50 resultados por busqueda
 # Productos sin talla que se siguen en Solotodo (comparador que revisa unas 12
 # tiendas: las grandes cada ~30 min, las chicas ~1 vez al dia). Avisa cuando
 # alguna tienda lo tiene con stock en oferta (precio normal, sin tarjeta de la
-# tienda) y otra vez si baja mas desde el ultimo aviso. Oferta es:
-#   - "precio_maximo": precio igual o menor a ese tope, o
-#   - "precio_referencia": precio menor a ese (ej. el precio oficial de Apple).
+# tienda) y otra vez si baja mas desde el ultimo aviso. Oferta es un precio
+# menor a "precio_referencia" (el precio oficial de Apple Chile).
 PRODUCTOS_SOLOTODO = [
     {
         "modelo": "AirPods Pro 3",
         "solotodo_id": 355272,  # https://www.solotodo.cl/products/355272
-        # Precio habitual ~$249.990; minimos historicos ~$199.990 (CyberDay,
-        # Paris en oct-2026).
-        "precio_maximo": 229990,
+        # Precio habitual en tiendas ~$249.990; minimos historicos ~$199.990
+        # (CyberDay, Paris en oct-2026).
+        "precio_referencia": 299990,  # precio oficial Apple Chile
     },
     {
         "modelo": "AirPods 5",
@@ -138,6 +137,10 @@ PRODUCTOS_SOLOTODO = [
         "filtro_nombre": re.compile(r"inal[aá]mbric|charging|magsafe|wireless", re.I),
     },
 ]
+
+# Cuanto tiempo se recuerda un aviso de Solotodo despues de que el producto
+# sale de oferta (para no repetirlo si el precio sube y baja de nuevo).
+MEMORIA_AVISO = timedelta(hours=24)
 
 CARPETA = Path(__file__).resolve().parent
 ARCHIVO_ESTADO = CARPETA / "shozen_estado.json"
@@ -374,6 +377,7 @@ def cargar_estado():
             "precio": precio,
             "precio_normal": info.get("precio_normal"),
             "precio_avisado": info.get("precio_avisado"),
+            "fuera_desde": info.get("fuera_desde"),
         }
     return estado
 
@@ -520,6 +524,7 @@ def main():
                         "oferta": oferta,
                     })
 
+    ahora = datetime.now(ZONA_CL)
     for producto in PRODUCTOS_SOLOTODO:
         try:
             publicaciones = buscar_solotodo(producto["solotodo_id"])
@@ -528,8 +533,7 @@ def main():
             busquedas_error += 1
             print(f"[Solotodo] error buscando '{producto['modelo']}': {e}")
             continue
-        maximo = producto.get("precio_maximo")
-        referencia = producto.get("precio_referencia")
+        referencia = producto["precio_referencia"]
         filtro = producto.get("filtro_nombre")
         for p in publicaciones:
             if filtro and not filtro.search(p["nombre"] or ""):
@@ -537,11 +541,18 @@ def main():
             clave = f"Solotodo|{p['codigo']}|-"
             anterior = estado.get(clave) or {}
             precio = p["precio"]
-            oferta = bool(p["en_stock"] and precio and (
-                (maximo and precio <= maximo) or (referencia and precio < referencia)))
-            avisado = anterior.get("precio_avisado") if oferta else None
-            info = {"en_stock": p["en_stock"], "precio": p["precio"],
-                    "precio_normal": None, "precio_avisado": avisado}
+            oferta = bool(p["en_stock"] and precio and precio < referencia)
+            avisado = anterior.get("precio_avisado")
+            fuera_desde = None
+            if not oferta and avisado is not None:
+                # El aviso se recuerda 24 h despues de salir de oferta: si la
+                # tienda sube el precio un rato y lo vuelve a bajar al mismo
+                # valor, no se repite el aviso (paso con Falabella 03-11-2026).
+                fuera_desde = anterior.get("fuera_desde") or ahora.isoformat()
+                if ahora - datetime.fromisoformat(fuera_desde) > MEMORIA_AVISO:
+                    avisado = fuera_desde = None
+            info = {"en_stock": p["en_stock"], "precio": p["precio"], "precio_normal": None,
+                    "precio_avisado": avisado, "fuera_desde": fuera_desde}
             nuevo_estado[clave] = info
             if not oferta or (avisado is not None and p["precio"] >= avisado):
                 continue
@@ -549,12 +560,9 @@ def main():
             tarjeta = ""
             if p["precio_tarjeta"] and p["precio_tarjeta"] < p["precio"]:
                 tarjeta = f", con tarjeta de la tienda {fmt_clp(p['precio_tarjeta'])}"
-            if referencia:
-                dcto = round(100 * (1 - p["precio"] / referencia))
-                detalle = (f"<b>{fmt_clp(p['precio'])}</b> (precio Apple {fmt_clp(referencia)}, "
-                           f"-{dcto}%{tarjeta})")
-            else:
-                detalle = f"<b>{fmt_clp(p['precio'])}</b> (tu tope: {fmt_clp(maximo)}{tarjeta})"
+            dcto = round(100 * (1 - p["precio"] / referencia))
+            detalle = (f"<b>{fmt_clp(p['precio'])}</b> (precio Apple {fmt_clp(referencia)}, "
+                       f"-{dcto}%{tarjeta})")
             eventos.append({
                 "tipo": "OFERTA",
                 "tienda": p["tienda"],
