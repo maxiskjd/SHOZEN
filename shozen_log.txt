@@ -45,3 +45,9 @@
 [2026-11-03 12:30:44] OFERTA [Falabella] AirPods Pro 3 (APPLE Apple Airpods Pro 3-Ame) | tallas - | $229.990 | https://www.falabella.com/falabella-cl/product/17564271/Apple-Airpods-Pro-3-Ame/17564271
 [2026-11-03 13:00:49] OFERTA [Falabella] AirPods Pro 3 (APPLE Apple Airpods Pro 3-Ame) | tallas - | $229.990 | https://www.falabella.com/falabella-cl/product/17564271/Apple-Airpods-Pro-3-Ame/17564271
 [2026-11-03 13:30:50] OFERTA [Falabella] AirPods Pro 3 (APPLE Apple Airpods Pro 3-Ame) | tallas - | $229.990 | https://www.falabella.com/falabella-cl/product/17564271/Apple-Airpods-Pro-3-Ame/17564271
+[2026-11-03 13:45:43] OFERTA [Lider] AirPods Pro 3 (Apple Audífonos In Ear Airpods Pro con cancelación de ruido (3ª Gen USB-C Blanco) | tallas - | $249.990 | https://www.lider.cl/ip/audio/audifonos-in-ear-airpods-pro-con-cancelacion-de-ruido-3-gen-usb-c-blanco/00195950543612
+[2026-11-03 13:45:43] OFERTA [NotebookStore] AirPods Pro 3 (AirPods Pro con cancelación de ruido USB-C (3ª Gen)) | tallas - | $292.990 | https://notebookstore.cl/airpods-pro-con-cancelacion-de-ruido-usb-c-3%C2%AA-gen
+[2026-11-03 13:45:43] OFERTA [Paris] AirPods Pro 3 (Apple Apple AirPods Pro 3 con Cancelación Activa de Ruido) | tallas - | $279.990 | https://www.paris.cl/apple-airpods-pro-3-con-cancelacion-activa-de-ruido-278885999.html
+[2026-11-03 13:45:43] OFERTA [Ripley] AirPods Pro 3 (AIRPODS PRO 3 (Blanco)) | tallas - | $269.990 | https://simple.ripley.cl/airpods-pro-3-2000408336167p
+[2026-11-03 13:45:43] OFERTA [Tecnomas.cl] AirPods Pro 3 (AirPods Pro 3 con cancelación de ruido USB-C) | tallas - | $295.990 | https://tecnomas.cl/producto/apple-airpods-pro-3-mfhp4am-a
+[2026-11-03 13:45:43] OFERTA [Tienda Movistar] AirPods Pro 3 (Apple AirPods Pro 3 Blanco) | tallas - | $269.990 | https://catalogo.movistar.cl/tienda/apple-airpods-pro-3-blanco
