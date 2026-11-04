@@ -51,3 +51,4 @@
 [2026-11-03 13:45:43] OFERTA [Ripley] AirPods Pro 3 (AIRPODS PRO 3 (Blanco)) | tallas - | $269.990 | https://simple.ripley.cl/airpods-pro-3-2000408336167p
 [2026-11-03 13:45:43] OFERTA [Tecnomas.cl] AirPods Pro 3 (AirPods Pro 3 con cancelación de ruido USB-C) | tallas - | $295.990 | https://tecnomas.cl/producto/apple-airpods-pro-3-mfhp4am-a
 [2026-11-03 13:45:43] OFERTA [Tienda Movistar] AirPods Pro 3 (Apple AirPods Pro 3 Blanco) | tallas - | $269.990 | https://catalogo.movistar.cl/tienda/apple-airpods-pro-3-blanco
+[2026-11-04 08:00:51] OFERTA [Mercado Libre] AirPods 5 (AirPods 5 - Distribuidor Autorizado) | tallas - | $154.990 | https://www.mercadolibre.cl/p/MLC1077831584?pdp_filters=official_store:all
