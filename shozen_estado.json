@@ -182,12 +182,14 @@
     },
     "Bold|PM39520550|4.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 42990,
       "precio_avisado": null,
       "precio_normal": 84990
     },
     "Bold|PM39520550|5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 42990,
       "precio_avisado": null,
       "precio_normal": 84990
@@ -230,12 +232,14 @@
     },
     "Bold|PM40365101|4.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 66990,
       "precio_avisado": null,
       "precio_normal": 94990
     },
     "Bold|PM40365101|5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 66990,
       "precio_avisado": null,
       "precio_normal": 94990
