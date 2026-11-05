@@ -38,24 +38,28 @@
     },
     "Bold|NIDV0788001|8.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 122990,
       "precio_avisado": null,
       "precio_normal": 122990
     },
     "Bold|NIDV0788001|9": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 122990,
       "precio_avisado": null,
       "precio_normal": 122990
     },
     "Bold|NIFJ4146123|8.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
     },
     "Bold|NIFJ4146123|9": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
@@ -74,12 +78,14 @@
     },
     "Bold|NIIB6388100|8.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
     },
     "Bold|NIIB6388100|9": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
@@ -134,12 +140,14 @@
     },
     "Bold|NIIR5599001|8.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
     },
     "Bold|NIIR5599001|9": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
