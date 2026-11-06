@@ -56,3 +56,5 @@
 [2026-11-05 08:01:04] OFERTA [Mercado Libre] AirPods 5 (AirPods 5 - Distribuidor Autorizado) | tallas - | $154.554 | https://www.mercadolibre.cl/p/MLC1077831584?pdp_filters=official_store:all
 [2026-11-05 16:15:36] OFERTA [Falabella] AirPods 5 (carga inalambrica) (APPLE Apple AirPods 5 con Estuche de Carga Inalámbrica) | tallas - | $169.990 | https://www.falabella.com/falabella-cl/product/17776916/apple-airpods-5-con-estuche-de-carga-inalambrica/17776916
 [2026-11-06 16:30:37] OFERTA [Paris] AirPods 5 (Apple Apple AirPods 5) | tallas - | $149.990 | https://www.paris.cl/apple-airpods-5-605631999.html
+[2026-11-06 16:45:41] OFERTA [Paris] AirPods Pro 3 (Apple Apple AirPods Pro 3 con Cancelación Activa de Ruido) | tallas - | $259.990 | https://www.paris.cl/apple-airpods-pro-3-con-cancelacion-activa-de-ruido-278885999.html
+[2026-11-06 16:45:41] OFERTA [Ripley] AirPods Pro 3 (AIRPODS PRO 3 (Blanco)) | tallas - | $259.990 | https://simple.ripley.cl/airpods-pro-3-2000408336167p
