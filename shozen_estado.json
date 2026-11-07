@@ -178,14 +178,14 @@
     },
     "Bold|PM39520533|4.5": {
       "en_stock": true,
-      "precio": 89990,
-      "precio_avisado": null,
+      "precio": 54990,
+      "precio_avisado": 54990,
       "precio_normal": 89990
     },
     "Bold|PM39520533|5": {
       "en_stock": true,
-      "precio": 89990,
-      "precio_avisado": null,
+      "precio": 54990,
+      "precio_avisado": 54990,
       "precio_normal": 89990
     },
     "Bold|PM39520550|4.5": {
@@ -216,13 +216,13 @@
     },
     "Bold|PM39520579|4.5": {
       "en_stock": false,
-      "precio": 89990,
+      "precio": 54990,
       "precio_avisado": null,
       "precio_normal": 89990
     },
     "Bold|PM39520579|5": {
       "en_stock": false,
-      "precio": 89990,
+      "precio": 54990,
       "precio_avisado": null,
       "precio_normal": 89990
     },
@@ -261,14 +261,14 @@
     },
     "Bold|PM40447203|10": {
       "en_stock": false,
-      "precio": 94990,
+      "precio": 57990,
       "precio_avisado": null,
       "precio_normal": 94990
     },
     "Bold|PM40447207|10": {
       "en_stock": true,
-      "precio": 94990,
-      "precio_avisado": null,
+      "precio": 57990,
+      "precio_avisado": 57990,
       "precio_normal": 94990
     },
     "Solotodo|2117019|-": {
