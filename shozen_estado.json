@@ -294,8 +294,8 @@
     },
     "Solotodo|2136278|-": {
       "en_stock": true,
-      "fuera_desde": null,
-      "precio": 229990,
+      "fuera_desde": "2026-11-08T08:00:48.864436-03:00",
+      "precio": 329990,
       "precio_avisado": 229990,
       "precio_normal": null
     },
