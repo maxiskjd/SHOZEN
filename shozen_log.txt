@@ -60,3 +60,4 @@
 [2026-11-06 16:45:41] OFERTA [Ripley] AirPods Pro 3 (AIRPODS PRO 3 (Blanco)) | tallas - | $259.990 | https://simple.ripley.cl/airpods-pro-3-2000408336167p
 [2026-11-07 08:01:04] OFERTA [Bold] 180 PRO Zapatillas Puma Hombre Blanco | tallas 10 | $57.990 (antes $94.990) | https://www.bold.cl/Categories/Genero/Hombre/Calzado-Hombre/Zapatillas-Hombre/180-PRO-Zapatillas-Puma-Hombre-Blanco/p/PM40447207
 [2026-11-07 08:01:04] OFERTA [Bold] Suede XL Zapatillas Puma Unisex Negro | tallas 4.5, 5 | $54.990 (antes $89.990) | https://www.bold.cl/Categories/Genero/Hombre/Calzado-Hombre/Zapatillas-Hombre/Suede-XL-Zapatillas-Puma-Unisex-Negro/p/PM39520533
+[2026-11-09 16:45:35] OFERTA [Falabella] AirPods Pro 3 (APPLE AirPods Pro Apple Bluetooth ANC) | tallas - | $289.990 | https://www.falabella.com/falabella-cl/product/17564271/Apple-Airpods-Pro-3-Ame/17564271
