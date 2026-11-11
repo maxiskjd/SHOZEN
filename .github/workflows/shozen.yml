@@ -1,7 +1,7 @@
 name: SHOZEN
 
 on:
-  # Lo activa cron-job.org (tarea "SHOZEN") cada 5 min de 8:00 a 22:55 hora
+  # Lo activa cron-job.org (tarea "SHOZEN") cada 5 min de 6:00 a 23:55 hora
   # de Chile, con un POST a la API de GitHub (workflow_dispatch). Se dejo de
   # usar "schedule" porque GitHub saltaba ejecuciones (habia horas sin correr).
   # Tambien se puede correr a mano desde la pestaña Actions.

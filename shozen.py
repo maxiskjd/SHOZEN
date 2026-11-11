@@ -10,7 +10,7 @@ de las tallas objetivo (US hombre):
     (salvo en modelos con "solo_ofertas", que solo avisan en oferta).
   - OFERTA: la talla tiene stock y entro en descuento, o el precio de oferta
     bajo todavia mas desde el ultimo aviso.
-Fuera del horario 8:00-23:00 (hora de Chile) no revisa nada.
+Fuera del horario 6:00-24:00 (hora de Chile) no revisa nada.
 
 Uso manual: python shozen.py
 Requiere TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID para avisar (si no estan,
@@ -155,8 +155,8 @@ HEADERS = {
 TIMEOUT = 20
 
 ZONA_CL = ZoneInfo("America/Santiago")
-HORA_INICIO = 8
-HORA_FIN = 23
+HORA_INICIO = 6
+HORA_FIN = 24  # incluye las corridas de las 23:xx
 
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")

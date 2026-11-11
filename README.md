@@ -2,7 +2,7 @@
 
 Revisa Bold, Moredrops y The Line buscando stock y ofertas de los modelos en
 `CONFIGURACION_BUSQUEDA` (dentro de `shozen.py`) y avisa por
-Telegram. Corre en GitHub Actions cada 5 minutos entre 8:00 y 22:55 (hora
+Telegram. Corre en GitHub Actions cada 5 minutos entre 6:00 y 23:55 (hora
 de Chile), activado por [cron-job.org](https://cron-job.org), sin depender de
 que ningun PC este prendido (ver "Cuando corre").
 
@@ -59,7 +59,7 @@ pero GitHub se saltaba ejecuciones y pasaban horas sin correr.
 Ahora lo activa una tarea en cron-job.org:
 
 - **URL:** `https://api.github.com/repos/maxiskjd/SHOZEN/actions/workflows/shozen.yml/dispatches`
-- **Horario:** cada 5 minutos, de las 8 a las 22, zona horaria
+- **Horario:** cada 5 minutos, de las 6 a las 23, zona horaria
   `America/Santiago` (sigue solo el cambio de horario de verano).
 - **Metodo:** `POST`, con body `{"ref":"main"}`.
 - **Headers:**
@@ -75,7 +75,7 @@ cuando venza el bot deja de correr; hay que regenerarlo en
 https://github.com/settings/personal-access-tokens y pegar el nuevo en
 cron-job.org. Nunca lo subas a este repo.
 
-El script igual revisa la hora de Chile y no hace nada fuera de 8:00-23:00,
+El script igual revisa la hora de Chile y no hace nada fuera de 6:00-24:00,
 asi que una corrida a mano fuera de horario no avisa.
 
 Costo: el repo es publico, asi que GitHub Actions no tiene limite de minutos
