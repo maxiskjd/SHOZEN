@@ -598,12 +598,14 @@
     },
     "The Line|2784|8.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 222990,
       "precio_avisado": null,
       "precio_normal": 222990
     },
     "The Line|2784|9": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 222990,
       "precio_avisado": null,
       "precio_normal": 222990
@@ -622,14 +624,12 @@
     },
     "The Line|4012|8.5": {
       "en_stock": false,
-      "fuera_desde": null,
       "precio": 229990,
       "precio_avisado": null,
       "precio_normal": 229990
     },
     "The Line|4012|9": {
-      "en_stock": false,
-      "fuera_desde": null,
+      "en_stock": true,
       "precio": 229990,
       "precio_avisado": null,
       "precio_normal": 229990
