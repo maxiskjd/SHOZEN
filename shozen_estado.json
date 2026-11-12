@@ -330,8 +330,8 @@
     "Solotodo|2144955|-": {
       "en_stock": true,
       "fuera_desde": null,
-      "precio": 249990,
-      "precio_avisado": 249990,
+      "precio": 239990,
+      "precio_avisado": 239990,
       "precio_normal": null
     },
     "Solotodo|2161824|-": {
@@ -432,11 +432,18 @@
       "precio_avisado": null,
       "precio_normal": null
     },
+    "Solotodo|2343939|-": {
+      "en_stock": true,
+      "fuera_desde": null,
+      "precio": 149990,
+      "precio_avisado": 149990,
+      "precio_normal": null
+    },
     "Solotodo|2343940|-": {
       "en_stock": true,
       "fuera_desde": null,
-      "precio": 179990,
-      "precio_avisado": null,
+      "precio": 169990,
+      "precio_avisado": 169990,
       "precio_normal": null
     },
     "Solotodo|2345270|-": {
