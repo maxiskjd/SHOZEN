@@ -67,3 +67,4 @@
 [2026-11-12 06:00:48] OFERTA [Lider] AirPods 5 (Apple AirPods 5) | tallas - | $149.990 | https://www.lider.cl/ip/audio/airpods-5/00019595137888
 [2026-11-12 06:00:48] OFERTA [Lider] AirPods 5 (carga inalambrica) (Apple AirPods 5 con estuche de carga inalámbrica) | tallas - | $169.990 | https://www.lider.cl/ip/audio/airpods-5-con-estuche-de-carga-inalambrica/00019595137856
 [2026-11-12 06:00:48] OFERTA [Lider] AirPods Pro 3 (Apple Audífonos In Ear Airpods Pro con cancelación de ruido (3ª Gen USB-C Blanco) | tallas - | $239.990 | https://www.lider.cl/ip/audio/audifonos-in-ear-airpods-pro-con-cancelacion-de-ruido-3-gen-usb-c-blanco/00195950543612
+[2026-11-12 11:35:35] DISPONIBLE [The Line] ZAPATILLA AIR JORDAN 4 RETRO SE HOMBRE | tallas 9 | $229.990 | https://www.theline.cl/fq7928-001--1/p
