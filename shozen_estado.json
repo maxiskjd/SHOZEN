@@ -2,42 +2,36 @@
   "productos": {
     "Bold|NICT2302100|8.5": {
       "en_stock": false,
-      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
     },
     "Bold|NICT2302100|9": {
       "en_stock": false,
-      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
     },
     "Bold|NICW2288111|8.5": {
       "en_stock": true,
-      "fuera_desde": null,
       "precio": 119990,
       "precio_avisado": null,
       "precio_normal": 119990
     },
     "Bold|NICW2288111|9": {
       "en_stock": true,
-      "fuera_desde": null,
       "precio": 119990,
       "precio_avisado": null,
       "precio_normal": 119990
     },
     "Bold|NIDO6701100|8.5": {
       "en_stock": true,
-      "fuera_desde": null,
       "precio": 142990,
       "precio_avisado": null,
       "precio_normal": 142990
     },
     "Bold|NIDO6701100|9": {
       "en_stock": true,
-      "fuera_desde": null,
       "precio": 142990,
       "precio_avisado": null,
       "precio_normal": 142990
@@ -72,14 +66,12 @@
     },
     "Bold|NIHQ2037100|8.5": {
       "en_stock": false,
-      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
     },
     "Bold|NIHQ2037100|9": {
       "en_stock": false,
-      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
@@ -100,14 +92,12 @@
     },
     "Bold|NIIB6388101|8.5": {
       "en_stock": false,
-      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
     },
     "Bold|NIIB6388101|9": {
       "en_stock": false,
-      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
@@ -138,14 +128,12 @@
     },
     "Bold|NIIR0952100|8.5": {
       "en_stock": false,
-      "fuera_desde": null,
       "precio": 132990,
       "precio_avisado": null,
       "precio_normal": 132990
     },
     "Bold|NIIR0952100|9": {
       "en_stock": false,
-      "fuera_desde": null,
       "precio": 132990,
       "precio_avisado": null,
       "precio_normal": 132990
@@ -166,14 +154,12 @@
     },
     "Bold|NIIV2857100|8.5": {
       "en_stock": true,
-      "fuera_desde": null,
       "precio": 134990,
       "precio_avisado": null,
       "precio_normal": 134990
     },
     "Bold|NIIV2857100|9": {
       "en_stock": true,
-      "fuera_desde": null,
       "precio": 134990,
       "precio_avisado": null,
       "precio_normal": 134990
