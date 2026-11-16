@@ -645,12 +645,14 @@
     },
     "The Line|4177|8.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 149990,
       "precio_avisado": null,
       "precio_normal": 149990
     },
     "The Line|4177|9": {
       "en_stock": true,
+      "fuera_desde": null,
       "precio": 149990,
       "precio_avisado": null,
       "precio_normal": 149990
