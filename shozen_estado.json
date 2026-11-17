@@ -116,12 +116,14 @@
     },
     "Bold|NIIO2463102|8.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
     },
     "Bold|NIIO2463102|9": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
@@ -154,14 +156,12 @@
     },
     "Bold|NIIV2857100|8.5": {
       "en_stock": true,
-      "fuera_desde": null,
       "precio": 134990,
       "precio_avisado": null,
       "precio_normal": 134990
     },
     "Bold|NIIV2857100|9": {
       "en_stock": true,
-      "fuera_desde": null,
       "precio": 134990,
       "precio_avisado": null,
       "precio_normal": 134990
