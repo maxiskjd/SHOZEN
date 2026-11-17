@@ -183,9 +183,9 @@
       "precio_normal": 89990
     },
     "Bold|PM39520533|5": {
-      "en_stock": true,
+      "en_stock": false,
       "precio": 54990,
-      "precio_avisado": 54990,
+      "precio_avisado": null,
       "precio_normal": 89990
     },
     "Bold|PM39520550|4.5": {
