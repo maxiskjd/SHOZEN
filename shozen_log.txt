@@ -73,3 +73,4 @@
 [2026-11-16 16:20:44] OFERTA [Lider] AirPods Pro 3 (Apple Audífonos In Ear Airpods Pro con cancelación de ruido (3ª Gen USB-C Blanco) | tallas - | $239.990 | https://www.lider.cl/ip/Aud-fonos-In-Ear-Airpods-Pro-con-cancelaci-n-de-ruido-3-Gen-USB-C-Blanco/00195950543612
 [2026-11-18 06:00:33] OFERTA [Falabella] AirPods 5 (APPLE Apple AirPods 5) | tallas - | $149.990 | https://www.falabella.com/falabella-cl/product/17776917/apple-airpods-5/17776917
 [2026-11-18 06:00:33] OFERTA [Falabella] AirPods 5 (carga inalambrica) (APPLE Apple AirPods 5 con Estuche de Carga Inalámbrica) | tallas - | $169.990 | https://www.falabella.com/falabella-cl/product/17776916/apple-airpods-5-con-estuche-de-carga-inalambrica/17776916
+[2026-11-18 08:10:25] OFERTA [Mercado Libre] AirPods 5 (AirPods 5 - Distribuidor Autorizado) | tallas - | $154.554 | https://www.mercadolibre.cl/p/MLC1077831584?pdp_filters=official_store:all
