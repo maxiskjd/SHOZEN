@@ -516,12 +516,14 @@
     },
     "The Line|11529|4.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
     },
     "The Line|11529|5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": null,
       "precio_avisado": null,
       "precio_normal": null
@@ -695,36 +697,42 @@
     },
     "The Line|4376|4.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 79990,
       "precio_avisado": null,
       "precio_normal": 79990
     },
     "The Line|4376|5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 79990,
       "precio_avisado": null,
       "precio_normal": 79990
     },
     "The Line|4377|4.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 79990,
       "precio_avisado": null,
       "precio_normal": 79990
     },
     "The Line|4377|5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 79990,
       "precio_avisado": null,
       "precio_normal": 79990
     },
     "The Line|4378|4.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 79990,
       "precio_avisado": null,
       "precio_normal": 79990
     },
     "The Line|4378|5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 79990,
       "precio_avisado": null,
       "precio_normal": 79990
@@ -857,12 +865,14 @@
     },
     "The Line|8257|4.5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 84990,
       "precio_avisado": null,
       "precio_normal": 84990
     },
     "The Line|8257|5": {
       "en_stock": false,
+      "fuera_desde": null,
       "precio": 84990,
       "precio_avisado": null,
       "precio_normal": 84990
