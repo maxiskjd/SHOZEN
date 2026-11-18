@@ -593,7 +593,7 @@
       "precio_normal": 226990
     },
     "The Line|14847|9": {
-      "en_stock": true,
+      "en_stock": false,
       "precio": 226990,
       "precio_avisado": null,
       "precio_normal": 226990
@@ -730,7 +730,7 @@
       "precio_normal": 79990
     },
     "The Line|4379|4.5": {
-      "en_stock": true,
+      "en_stock": false,
       "precio": 79990,
       "precio_avisado": null,
       "precio_normal": 79990
@@ -742,7 +742,7 @@
       "precio_normal": 79990
     },
     "The Line|4380|4.5": {
-      "en_stock": true,
+      "en_stock": false,
       "precio": 79990,
       "precio_avisado": null,
       "precio_normal": 79990
@@ -796,7 +796,7 @@
       "precio_normal": 122990
     },
     "The Line|6264|9": {
-      "en_stock": true,
+      "en_stock": false,
       "precio": 122990,
       "precio_avisado": null,
       "precio_normal": 122990
@@ -820,7 +820,7 @@
       "precio_normal": 132990
     },
     "The Line|7509|9": {
-      "en_stock": true,
+      "en_stock": false,
       "precio": 132990,
       "precio_avisado": null,
       "precio_normal": 132990
