@@ -601,13 +601,13 @@
       "precio_normal": 132990
     },
     "The Line|7565|8.5": {
-      "en_stock": false,
+      "en_stock": true,
       "precio": 132990,
       "precio_avisado": null,
       "precio_normal": 132990
     },
     "The Line|7565|9": {
-      "en_stock": false,
+      "en_stock": true,
       "precio": 132990,
       "precio_avisado": null,
       "precio_normal": 132990
