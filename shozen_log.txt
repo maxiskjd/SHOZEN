@@ -76,3 +76,4 @@
 [2026-11-18 08:10:25] OFERTA [Mercado Libre] AirPods 5 (AirPods 5 - Distribuidor Autorizado) | tallas - | $154.554 | https://www.mercadolibre.cl/p/MLC1077831584?pdp_filters=official_store:all
 [2026-11-22 06:00:45] OFERTA [Falabella] AirPods Pro 3 (APPLE Apple Airpods Pro 3-Ame) | tallas - | $229.990 | https://www.falabella.com/falabella-cl/product/17564271/Apple-Airpods-Pro-3-Ame/17564271
 [2026-11-22 13:40:27] DISPONIBLE [The Line] Zapatilla Air Jordan 4 Retro Hombre | tallas 8.5 | $226.990 | https://www.theline.cl/io2463-102-10/p
+[2026-11-24 15:20:30] DISPONIBLE [The Line] ZAPATILLA PUMA PUMA-180 PRO UNISEX | tallas 10 | $94.990 | https://www.theline.cl/404472-02-11-5/p
