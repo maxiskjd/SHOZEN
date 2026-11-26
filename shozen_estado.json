@@ -349,7 +349,7 @@
       "precio_normal": 89990
     },
     "The Line|13017|10": {
-      "en_stock": true,
+      "en_stock": false,
       "precio": 94990,
       "precio_avisado": null,
       "precio_normal": 94990
@@ -643,7 +643,7 @@
       "precio_normal": 122990
     },
     "The Line|947|9": {
-      "en_stock": true,
+      "en_stock": false,
       "precio": 122990,
       "precio_avisado": null,
       "precio_normal": 122990
