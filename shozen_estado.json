@@ -253,9 +253,9 @@
       "precio_normal": 94990
     },
     "Bold|PM40447207|10": {
-      "en_stock": true,
+      "en_stock": false,
       "precio": 57990,
-      "precio_avisado": 57990,
+      "precio_avisado": null,
       "precio_normal": 94990
     },
     "Moredrops|NIJF7766100|8.5": {
