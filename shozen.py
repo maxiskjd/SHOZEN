@@ -1,12 +1,15 @@
 """
 SHOZEN: vigia de stock y ofertas para modelos configurados (Jordan 4 Retro, Puma
-180 / 180 Pro, Air Force 1 blancas, Puma Suede XL) en Bold, Moredrops y The Line.
+180 / 180 Pro, Air Force 1 blancas, Puma Suede XL, lanzamiento Jordan 4 Bred) en
+Bold, Moredrops y The Line.
 
 Corre via GitHub Actions: cada corrida es independiente, compara contra el
 estado guardado en ARCHIVO_ESTADO y avisa por Telegram solo cuando, en una
 de las tallas objetivo (US hombre):
   - DISPONIBLE: la talla paso de agotada (o nunca vista) a tener stock
     (salvo en modelos con "solo_ofertas", que solo avisan en oferta).
+  - APARECIO: en modelos con "aviso_aparicion", el producto se publico en la
+    tienda por primera vez (aunque todavia no tenga stock en las tallas).
   - OFERTA: la talla tiene stock y entro en descuento, o el precio de oferta
     bajo todavia mas desde el ultimo aviso.
 Fuera del horario 6:00-24:00 (hora de Chile) no revisa nada.
@@ -46,22 +49,22 @@ def _tiene(patron, nombre):
     return bool(re.search(patron, nombre or "", re.I))
 
 
-def es_jordan_4_retro(nombre, color):
+def es_jordan_4_retro(nombre, color, ref=""):
     # "4" como numero de modelo y "retro" (excluye la linea "4 RM").
     return _tiene(r"\b4\b", nombre) and _tiene(r"\bretro\b", nombre)
 
 
-def es_puma_180(nombre, color):
+def es_puma_180(nombre, color, ref=""):
     # Cubre "Puma 180", "180 Pro", "PUMA-180 POP", etc.
     return _tiene(r"\bpuma\b", nombre) and _tiene(r"\b180\b", nombre)
 
 
-def es_puma_suede_xl(nombre, color):
+def es_puma_suede_xl(nombre, color, ref=""):
     return (_tiene(r"\bsuede\b", nombre) and _tiene(r"\bxl\b", nombre)
             and _tiene(r"zapatilla", nombre))
 
 
-def es_air_force_1_blanca(nombre, color):
+def es_air_force_1_blanca(nombre, color, ref=""):
     if not (_tiene(r"\bair force 1\b", nombre) and _tiene(r"zapatilla", nombre)):
         return False
     if color:  # The Line trae el color como dato aparte
@@ -71,9 +74,33 @@ def es_air_force_1_blanca(nombre, color):
     return _tiene(r"\b(hombre|unisex)\s+blanc", nombre)
 
 
+# Codigos de estilo de la J4 "Bred" 2026 (las fuentes citan ambos). Bold y
+# Moredrops los usan en el codigo ("NIIX8180001"), The Line en el link.
+CODIGOS_J4_BRED = ("IX8180001", "FV5029001")
+
+
+def es_jordan_4_bred(nombre, color, ref=""):
+    ref_norm = re.sub(r"[^A-Z0-9]", "", (ref or "").upper())
+    if any(c in ref_norm for c in CODIGOS_J4_BRED):
+        return True
+    if not (_tiene(r"\bjordan\b", nombre) and _tiene(r"\b4\b", nombre)) or _tiene(r"\brm\b", nombre):
+        return False
+    texto = f"{nombre} {color}"
+    return _tiene(r"\bbred\b", texto) or (_tiene(r"negr", texto) and _tiene(r"roj", texto))
+
+
 # Cada entrada: termino de busqueda en las tiendas, filtro sobre el nombre
 # real (el buscador de las tiendas trae mucho ruido) y tallas US hombre.
 CONFIGURACION_BUSQUEDA = [
+    {
+        # Lanzamiento (Black Friday 2026): avisa apenas se publique en una
+        # tienda, aunque sea sin stock; despues avisa stock en 8.5/9 como siempre.
+        "modelo": "Jordan 4 Bred",
+        "termino": "jordan 4",
+        "filtro_modelo": es_jordan_4_bred,
+        "tallas_objetivo": {"8.5", "9"},
+        "aviso_aparicion": True,
+    },
     {
         "modelo": "Jordan 4 Retro",
         "termino": "air jordan 4 retro",
@@ -185,7 +212,7 @@ def buscar_occ(termino, site_id, base_url, filtro_modelo, tallas_objetivo):
         if not code or code in vistos:
             continue
         vistos.add(code)
-        if not (filtro_modelo(nombre, "") and es_de_hombre(nombre)):
+        if not (filtro_modelo(nombre, "", code) and es_de_hombre(nombre)):
             continue
 
         link = p.get("url") or ""
@@ -258,7 +285,8 @@ def buscar_theline(termino, filtro_modelo, tallas_objetivo):
         nombre = limpiar_nombre(p.get("productName"))
         color = (p.get("COLOR") or [""])[0]
         genero = " ".join(p.get("GENERO") or []) + " " + " ".join(p.get("EDAD") or [])
-        if not (filtro_modelo(nombre, color) and es_de_hombre(nombre, genero)):
+        ref = f"{p.get('productReference') or ''} {p.get('linkText') or ''}"
+        if not (filtro_modelo(nombre, color, ref) and es_de_hombre(nombre, genero)):
             continue
 
         tallas = {}
@@ -358,7 +386,7 @@ def armar_mensajes(eventos):
         e = html.escape
         tallas = ", ".join(
             f"{t} ({fmt_clp(i['precio'])})" for t, i in sorted(ev["tallas"].items(), key=lambda x: float(x[0]))
-        )
+        ) or "objetivo: sin stock todavia"
         precio_txt = fmt_clp(ev["precio"])
         if ev["oferta"]:
             dcto = round(100 * (1 - ev["precio"] / ev["precio_normal"]))
@@ -367,7 +395,7 @@ def armar_mensajes(eventos):
             f"<b>{e(ev['tipo'])} · {e(ev['tienda'])}</b>\n"
             f"{e(ev['nombre'])}\n"
             f"Tallas US {e(tallas)}\n"
-            f"{precio_txt}\n"
+            + (f"{precio_txt}\n" if ev["precio"] else "") +
             f"{e(ev['link'] or '')}"
         )
 
@@ -406,6 +434,8 @@ def main():
             for p in productos:
                 tallas_aviso = {}
                 tipos = set()
+                prefijo = f"{nombre_tienda}|{p['codigo']}|"
+                ya_visto = any(k.startswith(prefijo) for k in estado)
                 for talla in config["tallas_objetivo"]:
                     clave = f"{nombre_tienda}|{p['codigo']}|{talla}"
                     # Talla que ya no aparece en el producto = agotada.
@@ -437,15 +467,24 @@ def main():
                     if en_oferta(info):
                         info["precio_avisado"] = info["precio"]
 
+                if not tallas_aviso and config.get("aviso_aparicion") and not ya_visto:
+                    eventos.append({
+                        "tipo": "APARECIO", "tienda": nombre_tienda, "modelo": config["modelo"],
+                        "codigo": p["codigo"], "nombre": p["nombre"], "link": p["link"], "tallas": {},
+                        "precio": None, "precio_normal": None, "oferta": False,
+                    })
                 if tallas_aviso:
                     ref = min(tallas_aviso.values(), key=lambda i: i["precio"] or 10**9)
                     oferta = en_oferta(ref)
                     tipo = "DISPONIBLE" if "DISPONIBLE" in tipos else "OFERTA"
                     if tipo == "DISPONIBLE" and oferta:
                         tipo = "DISPONIBLE EN OFERTA"
+                    if config.get("aviso_aparicion") and not ya_visto:
+                        tipo = "APARECIO Y " + tipo
                     eventos.append({
                         "tipo": tipo,
                         "tienda": nombre_tienda,
+                        "codigo": p["codigo"],
                         "modelo": config["modelo"],
                         "nombre": p["nombre"],
                         "link": p["link"],
@@ -458,6 +497,12 @@ def main():
     if busquedas_ok == 0:
         print("Todas las busquedas fallaron: no se guarda nada en esta corrida.")
         return 1
+
+    # Un producto que calza con dos modelos (J4 Bred y J4 Retro) se avisa una vez.
+    unicos = {}
+    for ev in eventos:
+        unicos.setdefault((ev["tienda"], ev["codigo"]), ev)
+    eventos = list(unicos.values())
 
     # Ofertas primero, despues el resto.
     eventos.sort(key=lambda ev: (not ev["oferta"], ev["modelo"], ev["tienda"]))
