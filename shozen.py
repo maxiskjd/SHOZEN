@@ -5,7 +5,7 @@ Bold, Moredrops y The Line.
 
 Corre via GitHub Actions: cada corrida es independiente, compara contra el
 estado guardado en ARCHIVO_ESTADO y avisa por Telegram solo cuando, en una
-de las tallas objetivo (US hombre):
+de las tallas objetivo (US hombre, salvo modelos con otro "publico"):
   - DISPONIBLE: la talla paso de agotada (o nunca vista) a tener stock
     (salvo en modelos con "solo_ofertas", que solo avisan en oferta).
   - APARECIO: en modelos con "aviso_aparicion", el producto se publico en la
@@ -62,6 +62,19 @@ def es_puma_180(nombre, color, ref=""):
 def es_puma_suede_xl(nombre, color, ref=""):
     return (_tiene(r"\bsuede\b", nombre) and _tiene(r"\bxl\b", nombre)
             and _tiene(r"zapatilla", nombre))
+
+
+# Publico de cada producto. Cada modelo elige uno con "publico" (por defecto
+# hombre/unisex); los demas se descartan porque usan otra escala de tallas.
+def es_junior(nombre, genero=""):
+    # "JR"/"Junior"/"Joven" (9 a 16 años): misma numeracion que US hombre.
+    # Los de niño chico (PS) y bebe (INF) usan otra escala.
+    return (_tiene(r"\b(jr|junior|joven)\b", nombre)
+            and not _tiene(r"\b(ps|inf|ni[ñn]o|ni[ñn]a|beb[ée])\b", nombre))
+
+
+def es_de_mujer(nombre, genero=""):
+    return _tiene(r"\b(mujer|wns|wmns)\b", f"{nombre} {genero}") and not es_junior(nombre)
 
 
 def es_air_force_1_blanca(nombre, color, ref=""):
@@ -121,19 +134,42 @@ CONFIGURACION_BUSQUEDA = [
         # Casi siempre hay stock: avisar solo cuando esten en oferta.
         "solo_ofertas": True,
     },
+    # Puma Suede XL para un pie de 23 cm, en las tres escalas en que se vende:
+    # unisex/hombre US 5, junior US 5 y mujer US 6.5 (tabla de Puma).
     {
-        # Para mujer, pero en escala unisex/hombre (como Bold: "US 4.5 UNSX");
-        # por eso los modelos "mujer", que usan otra escala, quedan fuera.
         "modelo": "Puma Suede XL",
         "termino": "suede xl",
         "filtro_modelo": es_puma_suede_xl,
-        "tallas_objetivo": {"4.5", "5"},
+        "tallas_objetivo": {"5"},
+        "solo_ofertas": True,
+    },
+    {
+        "modelo": "Puma Suede XL Junior",
+        "termino": "suede xl",
+        "filtro_modelo": es_puma_suede_xl,
+        "publico": es_junior,
+        "escala_occ": "JR",
+        "tallas_objetivo": {"5"},
+        "solo_ofertas": True,
+    },
+    {
+        "modelo": "Puma Suede XL Mujer",
+        "termino": "suede xl",
+        "filtro_modelo": es_puma_suede_xl,
+        "publico": es_de_mujer,
+        "escala_occ": "WMNS",
+        "tallas_objetivo": {"6.5"},
         "solo_ofertas": True,
     },
 ]
 
-# Bold/Moredrops: "US 9 MEN" o, en modelos unisex, "US 4.5 UNSX" (misma escala).
-FILTRO_TALLA_OCC = re.compile(r"US\s+([\d.]+)\s+(?:MEN|UNSX)\b", re.I)
+# Bold/Moredrops escriben la escala junto a la talla: "US 9 MEN" o, en modelos
+# unisex, "US 4.5 UNSX" (misma escala); mujer "US 6.5 WMNS"; junior solo "US 5".
+FILTROS_TALLA_OCC = {
+    "MEN": re.compile(r"US\s+([\d.]+)\s+(?:MEN|UNSX)\b", re.I),
+    "WMNS": re.compile(r"US\s+([\d.]+)\s+WMNS?\b", re.I),
+    "JR": re.compile(r"US\s+([\d.]+)\s*$", re.I),
+}
 MAX_PAGINAS = 8  # tope de paginas de 50 resultados por busqueda
 
 CARPETA = Path(__file__).resolve().parent
@@ -186,10 +222,13 @@ def es_de_hombre(nombre, genero=""):
     return not FILTRO_NO_HOMBRE.search(nombre or "")
 
 
-def buscar_occ(termino, site_id, base_url, filtro_modelo, tallas_objetivo):
+def buscar_occ(config, site_id, base_url):
     """Bold y Moredrops (SAP Commerce / ynk.cl). Devuelve un item por
     colorway con sus tallas objetivo (stock + precio actual + precio normal)."""
-    q = requests.utils.quote(termino)
+    filtro_modelo, tallas_objetivo = config["filtro_modelo"], config["tallas_objetivo"]
+    publico = config.get("publico", es_de_hombre)
+    filtro_talla = FILTROS_TALLA_OCC[config.get("escala_occ", "MEN")]
+    q = requests.utils.quote(config["termino"])
     productos = []
     for pagina in range(MAX_PAGINAS):
         url = (
@@ -212,7 +251,7 @@ def buscar_occ(termino, site_id, base_url, filtro_modelo, tallas_objetivo):
         if not code or code in vistos:
             continue
         vistos.add(code)
-        if not (filtro_modelo(nombre, "", code) and es_de_hombre(nombre)):
+        if not (filtro_modelo(nombre, "", code) and publico(nombre)):
             continue
 
         link = p.get("url") or ""
@@ -239,7 +278,7 @@ def buscar_occ(termino, site_id, base_url, filtro_modelo, tallas_objetivo):
         for v in detalle.get("variantOptions", []):
             qualifiers = v.get("variantOptionQualifiers") or []
             talla_valor = qualifiers[0].get("value") if qualifiers else ""
-            m = FILTRO_TALLA_OCC.match(talla_valor or "")
+            m = filtro_talla.match(talla_valor or "")
             if not (m and m.group(1) in tallas_objetivo):
                 continue
             precio = a_entero((v.get("priceData") or {}).get("value")) or precio_prod
@@ -256,8 +295,11 @@ def buscar_occ(termino, site_id, base_url, filtro_modelo, tallas_objetivo):
     return resultado
 
 
-def buscar_theline(termino, filtro_modelo, tallas_objetivo):
+def buscar_theline(config):
     """The Line (VTEX): cada talla viene como un 'item' con su propio stock."""
+    termino, filtro_modelo = config["termino"], config["filtro_modelo"]
+    tallas_objetivo = config["tallas_objetivo"]
+    publico = config.get("publico", es_de_hombre)
     productos = []
     for pagina in range(MAX_PAGINAS):
         desde = pagina * 50
@@ -286,7 +328,7 @@ def buscar_theline(termino, filtro_modelo, tallas_objetivo):
         color = (p.get("COLOR") or [""])[0]
         genero = " ".join(p.get("GENERO") or []) + " " + " ".join(p.get("EDAD") or [])
         ref = f"{p.get('productReference') or ''} {p.get('linkText') or ''}"
-        if not (filtro_modelo(nombre, color, ref) and es_de_hombre(nombre, genero)):
+        if not (filtro_modelo(nombre, color, ref) and publico(nombre, genero)):
             continue
 
         tallas = {}
@@ -309,9 +351,9 @@ def buscar_theline(termino, filtro_modelo, tallas_objetivo):
 
 
 TIENDAS = [
-    ("Bold", lambda t, f, ta: buscar_occ(t, "boldb2cstore", "https://www.bold.cl", f, ta)),
-    ("Moredrops", lambda t, f, ta: buscar_occ(t, "dropsb2cstore", "https://www.moredrops.cl", f, ta)),
-    ("The Line", lambda t, f, ta: buscar_theline(t, f, ta)),
+    ("Bold", lambda c: buscar_occ(c, "boldb2cstore", "https://www.bold.cl")),
+    ("Moredrops", lambda c: buscar_occ(c, "dropsb2cstore", "https://www.moredrops.cl")),
+    ("The Line", buscar_theline),
 ]
 
 
@@ -424,7 +466,7 @@ def main():
     for config in CONFIGURACION_BUSQUEDA:
         for nombre_tienda, buscador in TIENDAS:
             try:
-                productos = buscador(config["termino"], config["filtro_modelo"], config["tallas_objetivo"])
+                productos = buscador(config)
                 busquedas_ok += 1
             except Exception as e:
                 busquedas_error += 1

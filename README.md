@@ -13,7 +13,9 @@ Modelos vigilados (productos de hombre o unisex, tallas US de hombre):
 | Jordan 4 Retro | 8.5, 9 |
 | Puma 180 / 180 Pro | 10 |
 | Air Force 1 blancas (solo ofertas) | 8.5, 9 |
-| Puma Suede XL, para mujer en escala unisex (solo ofertas) | 4.5, 5 |
+| Puma Suede XL para pie de 23 cm (solo ofertas): unisex/hombre | 5 |
+| Puma Suede XL Junior (JR) (solo ofertas) | 5 |
+| Puma Suede XL Mujer (solo ofertas) | 6.5 (escala mujer) |
 
 ## Configuracion inicial (una sola vez)
 
